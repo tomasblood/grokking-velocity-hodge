@@ -1,0 +1,59 @@
+{
+  "roots": {
+    "canonical_data": "/dbfs/FileStore/thesis",
+    "seed_sweep": "/dbfs/FileStore/thesis_seed_sweep"
+  },
+  "summary_dir": "{seed_sweep}/grokking_summary",
+  "analysis_tasks": [
+    "velocity_hodge",
+    "effdim_pca",
+    "heat_kernel"
+  ],
+  "chart_variant_prefix": "seed_sweep",
+  "training_defaults": {
+    "p": 113,
+    "d_model": 128,
+    "n_epochs": 25000,
+    "save_every": 500,
+    "n_sub": 500,
+    "train_frac": 0.3
+  },
+  "runs": [
+    {
+      "key": "seed598_probe42",
+      "label": "Seed 598",
+      "canonical": true,
+      "data_seed": 598,
+      "probe_seed": 42,
+      "root": "{canonical_data}",
+      "activation_dir": "{canonical_data}/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed598",
+      "train_if_missing": false,
+      "tmp_dir": "/tmp/grokking_seed_sweep_seed598"
+    },
+    {
+      "key": "seed599_probe43",
+      "label": "Seed 599",
+      "canonical": false,
+      "data_seed": 599,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed599",
+      "activation_dir": "{seed_sweep}/grokking_seed599/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed599",
+      "train_if_missing": true,
+      "tmp_dir": "/tmp/grokking_seed_sweep_seed599"
+    },
+    {
+      "key": "seed777_probe43",
+      "label": "Seed 777",
+      "canonical": false,
+      "data_seed": 777,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed777",
+      "activation_dir": "{seed_sweep}/grokking_seed777/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed777",
+      "train_if_missing": true,
+      "tmp_dir": "/tmp/grokking_seed_sweep_seed777"
+    }
+  ]
+}

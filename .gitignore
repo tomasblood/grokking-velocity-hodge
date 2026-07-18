@@ -1,0 +1,44 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.env
+.venv/
+venv/
+env/
+
+# Generated experiment data and model artefacts
+data/
+results/
+checkpoints/
+logs/
+scratch_outputs/
+*.npz
+*.npy
+*.pt
+*.pth
+*.ckpt
+*.h5
+
+# LaTeX build intermediates (the assembled paper.pdf is retained)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+_render/
+
+# Legacy figure outside the scoped manuscript
+figures/fig_bw_geodesic.pdf
+
+# Local import staging
+.template-source/
+
+Thumbs.db
+.DS_Store

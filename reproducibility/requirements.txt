@@ -1,0 +1,16 @@
+# Numerical and plotting dependencies
+numpy>=2.1,<2.6
+scipy>=1.15,<1.18
+matplotlib>=3.9,<3.11
+scikit-learn>=1.6,<1.9
+
+# Grokking model dependencies
+torch>=2.7,<2.11
+transformer-lens==2.17.0
+einops>=0.7,<0.9
+
+# Bures--Wasserstein helper
+POT>=0.9.5,<0.10
+
+# Diffusion geometry package used for graph/operator construction
+git+https://github.com/Iolo-Jones/DiffusionGeometry.git@f5dc795557d07b32795c0bb6bedf465246d999eb
