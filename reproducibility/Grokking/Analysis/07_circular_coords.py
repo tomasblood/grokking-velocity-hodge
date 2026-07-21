@@ -12,37 +12,39 @@
 # MAGIC - Figure: fig_circular_coords.pdf
 # MAGIC - JSON: circular_results.json
 
-# COMMAND ----------
+import gc
+import json
+import os
+import sys
 
-
-
-
-# MAGIC %pip install -q "git+https://github.com/Iolo-Jones/DiffusionGeometry.git@f5dc795557d07b32795c0bb6bedf465246d999eb" scikit-learn scipy matplotlib
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import os, gc, json
 import numpy as np
-from pathlib import Path
 import diffusion_geometry as dg
 from sklearn.decomposition import PCA
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap, rgb_to_hsv, hsv_to_rgb
 
 # COMMAND ----------
 
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    ACCENT_COLOR,
+    GREY_COLOR,
+    MAIN_COLOR,
+    VALIDATION_COLOR,
+    circular_correlation,
+    configure_grokking_runtime,
+    dg_circular_coordinate,
+    dg_circular_coordinate_from_rep,
+    dimmed_phase_cmap,
+    dominant_fourier_frequency,
+    fourier_circular_coordinate,
+    load_training_meta,
+    notebook_param,
+    set_paper_style,
+    shade_grokking_window,
+    write_json,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -61,16 +63,6 @@ KNN = 15
 N_BASIS = 30
 PCA_DIM = 10
 N_EIGPAIRS = 15
-
-
-def dimmed_phase_cmap(name: str, saturation: float, value: float) -> ListedColormap:
-    base = plt.get_cmap(name)
-    colours = base(np.linspace(0, 1, 256))
-    hsv = rgb_to_hsv(colours[:, :3])
-    hsv[:, 1] = np.clip(hsv[:, 1] * saturation, 0, 1)
-    hsv[:, 2] = np.clip(hsv[:, 2] * value, 0, 1)
-    colours[:, :3] = hsv_to_rgb(hsv)
-    return ListedColormap(colours, name=f"{name}_dimmed")
 
 
 PHASE_CMAP = dimmed_phase_cmap(PHASE_CMAP_NAME, PHASE_CMAP_SATURATION, PHASE_CMAP_VALUE)
@@ -253,8 +245,6 @@ fig.suptitle("DG circular-coordinate recovery during grokking", fontsize=14, fon
 fig.tight_layout(rect=[0, 0, 1, 0.94])
 fig.savefig(FIG_DIR / "fig_circular_coords.pdf")
 fig.savefig(FIG_DIR / "fig_circular_coords.png")
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print(f"Saved: {FIG_DIR / 'fig_circular_coords.pdf'}")
 

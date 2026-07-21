@@ -13,42 +13,32 @@
 # MAGIC - Figure: fig_fourier_ridge_pca.pdf
 # MAGIC - Figure: fig_pca_grid.pdf
 
-# COMMAND ----------
+import gc
+import os
+import sys
 
-
-
-
-# MAGIC %pip install -q scikit-learn scipy matplotlib
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-
-# COMMAND ----------
-
-
-# COMMAND ----------
-
-import os, gc, json
 import numpy as np
-from pathlib import Path
 from sklearn.decomposition import PCA
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap, rgb_to_hsv, hsv_to_rgb
 
 # COMMAND ----------
 
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    ACCENT_COLOR,
+    GREY_COLOR,
+    MAIN_COLOR,
+    best_fourier_ridge_frequency,
+    configure_grokking_runtime,
+    dimmed_phase_cmap,
+    fourier_ridge_projection,
+    load_training_meta,
+    notebook_param,
+    set_paper_style,
+    shade_grokking_window,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -63,16 +53,6 @@ print(f"ROOT: {ROOT}")
 P = 113
 EPOCHS = list(range(0, 25001, 500))
 PCA_EPOCHS = [0, 2500, 3000, 7500, 10000, 25000]
-
-
-def dimmed_phase_cmap(name: str, saturation: float, value: float) -> ListedColormap:
-    base = plt.get_cmap(name)
-    colours = base(np.linspace(0, 1, 256))
-    hsv = rgb_to_hsv(colours[:, :3])
-    hsv[:, 1] = np.clip(hsv[:, 1] * saturation, 0, 1)
-    hsv[:, 2] = np.clip(hsv[:, 2] * value, 0, 1)
-    colours[:, :3] = hsv_to_rgb(hsv)
-    return ListedColormap(colours, name=f"{name}_dimmed")
 
 
 PHASE_CMAP = dimmed_phase_cmap(PHASE_CMAP_NAME, PHASE_CMAP_SATURATION, PHASE_CMAP_VALUE)
@@ -117,8 +97,6 @@ ax.legend(loc="upper right", fontsize=10)
 fig.tight_layout()
 fig.savefig(FIG_DIR / "fig_effective_dim.pdf")
 fig.savefig(FIG_DIR / "fig_effective_dim.png")
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print(f"d_eff: {eff_dims[0]['d_eff']} -> {eff_dims[-1]['d_eff']}")
 gc.collect()
@@ -182,8 +160,6 @@ cb.ax.tick_params(labelsize=10)
 
 fig.savefig(FIG_DIR / "fig_fourier_ridge_pca.pdf")
 fig.savefig(FIG_DIR / "fig_fourier_ridge_pca.png")
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print(f"Saved Fourier ridge PCA grid (k={best_k})")
 gc.collect()
@@ -207,14 +183,13 @@ for idx, ep in enumerate(PCA_EPOCHS):
     ax.scatter(Z[:, 0], Z[:, 1], c=gt[:len(Z)], cmap=PHASE_CMAP, s=8, alpha=0.8)
     ax.set_title(f"Epoch {ep}", fontsize=12)
     ax.set_aspect("equal")
-    ax.set_xticks([]); ax.set_yticks([])
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 fig.suptitle("PCA of Grokking Activations (coloured by label)", fontsize=14)
 fig.tight_layout()
 fig.savefig(FIG_DIR / "fig_pca_grid.pdf")
 fig.savefig(FIG_DIR / "fig_pca_grid.png")
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print("Saved PCA grid")
 

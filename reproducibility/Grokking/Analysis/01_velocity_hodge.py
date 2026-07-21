@@ -13,36 +13,37 @@
 # MAGIC - Figure: fig_dg_velocity_quiver.pdf
 # MAGIC - JSON: velocity_hodge.json
 
-# COMMAND ----------
+import gc
+import json
+import os
+import sys
 
-
-
-
-# MAGIC %pip install -q "git+https://github.com/Iolo-Jones/DiffusionGeometry.git@f5dc795557d07b32795c0bb6bedf465246d999eb" scikit-learn scipy matplotlib
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import os, sys, gc, json
 import numpy as np
-from pathlib import Path
 import diffusion_geometry as dg
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 from sklearn.decomposition import PCA
 
 # COMMAND ----------
 
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    ACCENT_COLOR,
+    GREY_COLOR,
+    MAIN_COLOR,
+    SECONDARY_COLOR,
+    VALIDATION_COLOR,
+    configure_grokking_runtime,
+    edge_padded_moving_average,
+    farthest_point_sample,
+    hodge_decompose_velocity,
+    load_training_meta,
+    set_paper_style,
+    shade_grokking_window,
+    write_json,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -107,7 +108,9 @@ for i in range(len(EPOCHS) - 1):
     va = val_accs[ep_idx]
 
     rec = {
-        "epoch_a": ep_a, "epoch_b": ep_b, "midpoint": mid,
+        "epoch_a": ep_a,
+        "epoch_b": ep_b,
+        "midpoint": mid,
         "exact": round(decomp["exact"], 4),
         "coexact": round(decomp["coexact"], 4),
         "harmonic": round(decomp["harmonic"], 4),
@@ -151,7 +154,6 @@ print(f"\nSaved: {OUT_DIR / 'velocity_hodge.json'}")
 # COMMAND ----------
 
 # DBTITLE 1,fig_dg_velocity_hodge.pdf
-from matplotlib.ticker import MultipleLocator
 midpoints = np.array([r["midpoint"] for r in results])
 exact = np.array([r["exact"] for r in results])
 coexact = np.array([r["coexact"] for r in results])
@@ -163,13 +165,17 @@ exact_c = np.clip(exact, 0, None)
 coexact_c = np.clip(coexact, 0, None)
 harmonic_c = np.clip(harmonic, 0, None)
 total = exact_c + coexact_c + harmonic_c
-exact_n = exact_c / total; coexact_n = coexact_c / total; harmonic_n = harmonic_c / total
+exact_n = exact_c / total
+coexact_n = coexact_c / total
+harmonic_n = harmonic_c / total
 
 exact_s = edge_padded_moving_average(exact_n)
 coexact_s = edge_padded_moving_average(coexact_n)
 harmonic_s = edge_padded_moving_average(harmonic_n)
 ts = exact_s + coexact_s + harmonic_s
-exact_s /= ts; coexact_s /= ts; harmonic_s /= ts
+exact_s /= ts
+coexact_s /= ts
+harmonic_s /= ts
 
 c_ex, c_co, c_ha = MAIN_COLOR, ACCENT_COLOR, SECONDARY_COLOR
 fig, axes = plt.subplots(2, 1, figsize=(8.2, 5.8), height_ratios=[3, 1],
@@ -187,14 +193,16 @@ ax.text(label_x, exact_s[-1], 'exact', color=c_ex, fontsize=11, va='center')
 ax.text(label_x, coexact_s[-1], 'coexact', color=c_co, fontsize=11, va='center')
 ax.text(label_x, harmonic_s[-1], 'harmonic', color=c_ha, fontsize=11, va='center')
 ax.set_ylabel('Energy fraction', fontsize=12)
-ax.set_ylim(0, 1); ax.set_xlim(0, 27500)
+ax.set_ylim(0, 1)
+ax.set_xlim(0, 27500)
 ax.legend(loc='upper left', fontsize=10)
 ax.yaxis.set_major_locator(MultipleLocator(0.2))
 
 ax2 = axes[1]
 ax2.plot(midpoints, va_arr, color=VALIDATION_COLOR, linewidth=1.8)
 shade_grokking_window(ax2)
-ax2.set_ylabel('Val acc', fontsize=12); ax2.set_xlabel('Epoch', fontsize=12)
+ax2.set_ylabel('Val acc', fontsize=12)
+ax2.set_xlabel('Epoch', fontsize=12)
 ax2.set_xlim(0, 27500)
 ax2.set_ylim(-0.05, 1.05)
 ax2.xaxis.set_major_locator(MultipleLocator(5000))
@@ -202,8 +210,6 @@ fig.align_ylabels()
 fig.subplots_adjust(hspace=0.08)
 fig.savefig(FIG_DIR / "fig_dg_velocity_hodge.pdf", bbox_inches='tight')
 fig.savefig(FIG_DIR / "fig_dg_velocity_hodge.png", bbox_inches='tight')
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print(f"Saved: {FIG_DIR / 'fig_dg_velocity_hodge.pdf'}")
 
@@ -276,9 +282,12 @@ for epoch_col, ((ep_a, ep_b), row_label) in enumerate(zip(PAIRS, ROW_LABELS)):
         ax.quiver(pos[idx, 0], pos[idx, 1], V_2d[idx, 0], V_2d[idx, 1],
                   color=qcol, alpha=0.75, scale=p90 * 8,
                   width=0.005, headwidth=3.5, headlength=4, zorder=2)
-        ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
+        ax.set_aspect('equal')
+        ax.set_xticks([])
+        ax.set_yticks([])
         for sp in ax.spines.values():
-            sp.set_linewidth(0.4); sp.set_color('#cccccc')
+            sp.set_linewidth(0.4)
+            sp.set_color('#cccccc')
         if component_row == 0:
             ax.set_title(row_label, fontsize=11, fontweight='bold', pad=6)
         if epoch_col == 0:
@@ -292,8 +301,6 @@ for epoch_col, ((ep_a, ep_b), row_label) in enumerate(zip(PAIRS, ROW_LABELS)):
 plt.subplots_adjust(wspace=0.08, hspace=0.16, left=0.12, right=0.98, top=0.94, bottom=0.03)
 fig.savefig(FIG_DIR / "fig_dg_velocity_quiver.pdf", bbox_inches='tight')
 fig.savefig(FIG_DIR / "fig_dg_velocity_quiver.png", bbox_inches='tight')
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 print(f"Saved: {FIG_DIR / 'fig_dg_velocity_quiver.pdf'}")
 

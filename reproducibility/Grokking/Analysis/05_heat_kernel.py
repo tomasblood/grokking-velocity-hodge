@@ -11,20 +11,11 @@
 # MAGIC - Figure: fig_heat_kernel_bw.pdf
 # MAGIC - JSON: heat_kernel_bw_results.json
 
-# COMMAND ----------
+import gc
+import os
+import sys
 
-
-# MAGIC %pip install -q scikit-learn scipy matplotlib
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import os, gc, json
 import numpy as np
-from pathlib import Path
 from sklearn.decomposition import PCA
 import matplotlib
 matplotlib.use("Agg")
@@ -32,12 +23,22 @@ import matplotlib.pyplot as plt
 
 # COMMAND ----------
 
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    ACCENT_COLOR,
+    GREY_COLOR,
+    MAIN_COLOR,
+    VALIDATION_COLOR,
+    build_normalised_laplacian,
+    bw_distance,
+    configure_grokking_runtime,
+    heat_kernel_in_reference_basis,
+    laplacian_spectrum,
+    load_training_meta,
+    set_paper_style,
+    shade_grokking_window,
+    write_json,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -185,9 +186,7 @@ ax.legend(fontsize=10)
 plt.tight_layout()
 fig.savefig(FIG_DIR / "fig_heat_kernel_bw.pdf")
 fig.savefig(FIG_DIR / "fig_heat_kernel_bw.png")
-if "display" in globals():
-    display(fig)
-print(f"Saved: fig_heat_kernel_bw.pdf/.png")
+print("Saved: fig_heat_kernel_bw.pdf/.png")
 plt.close(fig)
 
 # COMMAND ----------

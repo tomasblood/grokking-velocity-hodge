@@ -9,6 +9,7 @@ experiments reported in `paper.tex`.
 - `Grokking/Analysis/01_velocity_hodge.py` computes the pointwise velocity-field Hodge decomposition.
 - `Grokking/Analysis/02_effdim_pca.py` computes effective dimension.
 - `Grokking/Analysis/03_eigenvalues.py` computes the diffusion-operator eigenspectra.
+- `Grokking/Analysis/04_resolvent_bw.py` computes consecutive global resolvent BW distances.
 - `Grokking/Analysis/05_heat_kernel.py` computes heat-kernel BW distances.
 - `Grokking/Analysis/07_circular_coords.py` computes circular coordinates.
 - `Grokking/Analysis/09_probe_subset_robustness.py` evaluates probe-subset robustness.
@@ -31,6 +32,12 @@ Install dependencies with:
 
 ```powershell
 pip install -r reproducibility/requirements.txt
+```
+
+Run the focused regression suite with:
+
+```powershell
+python -m unittest discover -s reproducibility/tests -v
 ```
 
 Train the canonical model when activations are unavailable, then run:

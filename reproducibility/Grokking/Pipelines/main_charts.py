@@ -6,19 +6,19 @@
 # MAGIC Runs the selected Grokking analysis tasks and verifies their JSON and figure
 # MAGIC outputs and writes figures under the configured thesis data root.
 
-# COMMAND ----------
-
-
-from pathlib import Path
-
-# COMMAND ----------
-
 import os
 import sys
-from pathlib import Path
 
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from pipeline_helpers import *
+from pipeline_helpers import (
+    PipelineTask,
+    bool_widget,
+    reproduction_code_dir,
+    run_notebook_pipeline,
+    thesis_data_root,
+    widget_or_default,
+    workspace_root,
+)
 
 
 WORKSPACE_ROOT = workspace_root()
@@ -76,6 +76,13 @@ TASKS: tuple[PipelineTask, ...] = (
         ANALYSIS_ROOT,
     ),
     PipelineTask("eigenvalues", "03_eigenvalues", ("fig_eigenvalue_evolution.png", "fig_eigenvalue_evolution.pdf"), ANALYSIS_ROOT),
+    PipelineTask(
+        "resolvent_bw",
+        "04_resolvent_bw",
+        ("fig_resolvent_bw.png", "fig_resolvent_bw.pdf"),
+        ANALYSIS_ROOT,
+        (str(DATA_ROOT / "results" / "grokking_resolvent_bw" / "resolvent_bw_results.json"),),
+    ),
     PipelineTask("heat_kernel", "05_heat_kernel", ("fig_heat_kernel_bw.png", "fig_heat_kernel_bw.pdf"), ANALYSIS_ROOT, (str(DATA_ROOT / "results" / "grokking_heat_kernel" / "heat_kernel_bw_results.json"),)),
     PipelineTask("circular_coords", "07_circular_coords", ("fig_circular_coords.png", "fig_circular_coords.pdf"), ANALYSIS_ROOT, (str(DATA_ROOT / "results" / "grokking_circular_coords" / "circular_results.json"),)),
     PipelineTask("probe_subset_robustness", "09_probe_subset_robustness", (), ANALYSIS_ROOT, (str(DATA_ROOT / "results" / "grokking_probe_subset_robustness_28_04_2026" / "09_probe_subset_robustness.json"),)),

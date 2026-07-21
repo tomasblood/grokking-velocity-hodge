@@ -148,15 +148,19 @@ def summarise_training(activation_dir: str | Path) -> dict[str, Any]:
     }
 
 
-def summarise_bw_geodesic(output_root: str | Path) -> dict[str, Any]:
-    data = read_json_if_present(Path(output_root) / "results" / "grokking_bw_geodesic" / "bw_geodesic_results.json")
+def summarise_resolvent_bw(output_root: str | Path) -> dict[str, Any]:
+    data = read_json_if_present(
+        Path(output_root) / "results" / "grokking_resolvent_bw" / "resolvent_bw_results.json"
+    )
     if data is None:
         return {"available": False}
     series = data.get("bw_distances_consecutive", {})
     return {
         "available": True,
-        "summary": summarise_transition_series(series.get("midpoint_epochs", []), series.get("distances", [])),
-        "key_pairs": data.get("key_pairs", {}),
+        "summary": summarise_transition_series(
+            series.get("midpoint_epochs", []),
+            series.get("distances", []),
+        ),
     }
 
 
@@ -175,26 +179,32 @@ def summarise_heat_kernel(output_root: str | Path, tau: float = 1.0) -> dict[str
     }
 
 
-def summarise_spectral_perturbation(output_root: str | Path) -> dict[str, Any]:
+def summarise_hodge(output_root: str | Path) -> dict[str, Any]:
     data = read_json_if_present(
-        Path(output_root) / "results" / "grokking_spectral_perturbation" / "spectral_perturbation_results.json"
+        Path(output_root) / "results" / "grokking_dg_velocity_hodge" / "velocity_hodge.json"
     )
     if data is None:
         return {"available": False}
-    return {"available": True, "summary": data.get("summary", {})}
 
+    pairs = data.get("pairs", [])
+    midpoints = np.asarray([row["midpoint"] for row in pairs], dtype=float)
+    transition = (midpoints >= 1500) & (midpoints <= 4000)
 
-def summarise_subspace_bw(output_root: str | Path) -> dict[str, Any]:
-    data = read_json_if_present(Path(output_root) / "results" / "grokking_subspace_bw" / "subspace_bw_results.json")
-    if data is None:
-        return {"available": False}
-    midpoints = []
-    for label in data.get("epochs", []):
-        left, right = [float(x) for x in str(label).split("-", 1)]
-        midpoints.append(0.5 * (left + right))
+    def transition_mean(key: str) -> float | None:
+        values = np.asarray([row[key] for row in pairs], dtype=float)
+        return float(values[transition].mean()) if transition.any() else None
+
+    exact = transition_mean("exact")
+    coexact = transition_mean("coexact")
     return {
         "available": True,
-        "full": summarise_transition_series(midpoints, data.get("full", [])),
+        "config": data.get("config", {}),
+        "transition_mean_exact": exact,
+        "transition_mean_coexact": coexact,
+        "transition_mean_harmonic": transition_mean("harmonic"),
+        "transition_mean_coexact_minus_exact": (
+            float(coexact - exact) if coexact is not None and exact is not None else None
+        ),
     }
 
 
@@ -213,10 +223,9 @@ def summarise_seed_run(run: dict[str, Any], training_defaults: dict[str, Any]) -
         "output_root": str(output_root),
         "training": summarise_training(activation_dir),
         "effective_dimension": summarise_effective_dimension(activation_dir, final_epoch),
-        "bw_geodesic": summarise_bw_geodesic(output_root),
+        "hodge": summarise_hodge(output_root),
+        "resolvent_bw": summarise_resolvent_bw(output_root),
         "heat_kernel_tau_1": summarise_heat_kernel(output_root, tau=1.0),
-        "spectral_perturbation": summarise_spectral_perturbation(output_root),
-        "subspace_bw": summarise_subspace_bw(output_root),
     }
 
 
@@ -232,12 +241,14 @@ def nested_value(obj: dict[str, Any], path: list[str]) -> Any:
 def aggregate_seed_summaries(run_summaries: list[dict[str, Any]]) -> dict[str, Any]:
     metrics = {
         "effective_dimension_ratio_final_over_0": ["effective_dimension", "ratio_final_over_0"],
-        "bw_transition_peak_over_post": ["bw_geodesic", "summary", "transition_peak_over_post_mean"],
-        "bw_transition_mean_over_post": ["bw_geodesic", "summary", "transition_mean_over_post_mean"],
+        "hodge_transition_mean_coexact": ["hodge", "transition_mean_coexact"],
+        "hodge_transition_mean_coexact_minus_exact": ["hodge", "transition_mean_coexact_minus_exact"],
+        "resolvent_bw_transition_peak_over_post": [
+            "resolvent_bw",
+            "summary",
+            "transition_peak_over_post_mean",
+        ],
         "heat_tau_1_transition_peak_over_post": ["heat_kernel_tau_1", "summary", "transition_peak_over_post_mean"],
-        "spectral_transition_drift": ["spectral_perturbation", "summary", "transition_drift"],
-        "spectral_transition_mixing": ["spectral_perturbation", "summary", "transition_mixing"],
-        "subspace_full_transition_peak_over_post": ["subspace_bw", "full", "transition_peak_over_post_mean"],
     }
     return {
         name: mean_sd([nested_value(summary, path) for summary in run_summaries], ignore_none=True, include_n=True)
@@ -266,18 +277,15 @@ def seed_summary_rows(run_summaries: list[dict[str, Any]]) -> list[dict[str, Any
                 "val_ge_0_5_epoch": nested_value(summary, ["training", "first_epoch_val_ge_0_5"]),
                 "val_ge_0_99_epoch": nested_value(summary, ["training", "first_epoch_val_ge_0_99"]),
                 "d_eff_final_over_0": nested_value(summary, ["effective_dimension", "ratio_final_over_0"]),
-                "bw_peak_over_post": nested_value(summary, ["bw_geodesic", "summary", "transition_peak_over_post_mean"]),
+                "hodge_transition_coexact": nested_value(summary, ["hodge", "transition_mean_coexact"]),
+                "hodge_transition_coexact_minus_exact": nested_value(
+                    summary, ["hodge", "transition_mean_coexact_minus_exact"]
+                ),
+                "resolvent_bw_peak_over_post": nested_value(
+                    summary, ["resolvent_bw", "summary", "transition_peak_over_post_mean"]
+                ),
                 "heat_tau_1_peak_over_post": nested_value(
                     summary, ["heat_kernel_tau_1", "summary", "transition_peak_over_post_mean"]
-                ),
-                "spectral_transition_drift": nested_value(
-                    summary, ["spectral_perturbation", "summary", "transition_drift"]
-                ),
-                "spectral_transition_mixing": nested_value(
-                    summary, ["spectral_perturbation", "summary", "transition_mixing"]
-                ),
-                "subspace_peak_over_post": nested_value(
-                    summary, ["subspace_bw", "full", "transition_peak_over_post_mean"]
                 ),
             }
         )

@@ -88,7 +88,7 @@ def get_dbutils():
     try:
         return dbutils  # type: ignore[name-defined]
     except NameError:
-        dbutils_obj = None
+        pass
     try:
         from IPython import get_ipython
 

@@ -5,34 +5,20 @@
 # MAGIC Trains the modular addition transformer used by the Grokking chapter and
 # MAGIC writes the activation snapshots consumed by the analysis notebooks.
 
-# COMMAND ----------
-
-# MAGIC %pip install -q torch "transformer_lens==2.17.0" einops numpy
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
 import gc
 import json
 import os
 import shutil
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import torch
-
-# COMMAND ----------
-
-import os
-import sys
-from pathlib import Path
+from transformer_lens import HookedTransformer, HookedTransformerConfig
 
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import configure_grokking_runtime, ensure_dir, notebook_param, write_json
 
 GROKKING = configure_grokking_runtime()
 
@@ -94,8 +80,6 @@ np.save(TMP_DIR / "gt_labels.npy", gt_labels)
 print(f"Train: {n_train}; validation: {len(val_data)}; probe: {N_SUB}")
 
 # COMMAND ----------
-
-from transformer_lens import HookedTransformer, HookedTransformerConfig
 
 cfg = HookedTransformerConfig(
     n_layers=1,

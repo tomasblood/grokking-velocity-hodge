@@ -10,29 +10,15 @@
 # MAGIC - Subset robustness summaries for effective dimension and BW diagnostics
 # MAGIC - JSON: 09_probe_subset_robustness.json
 
-# COMMAND ----------
-
-
-# MAGIC %pip install -q scikit-learn scipy numpy
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import numpy as np
-
-# COMMAND ----------
-
 import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+import numpy as np
 
-from grokking_control_helpers import *
+sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
+from grokking_control_helpers import aggregate_probe_subsets, analyse_probe_subset
+from runtime import configure_grokking_runtime, write_json
 
 GROKKING = configure_grokking_runtime()
 ACT_DIR = GROKKING.activation_dir

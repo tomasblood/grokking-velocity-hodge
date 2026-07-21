@@ -11,19 +11,9 @@
 # MAGIC - Figure: fig_grokking_event_study.pdf
 # MAGIC - JSON: event_study_results.json
 
-# COMMAND ----------
-
-
-# MAGIC %pip install -q matplotlib numpy
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
 import json
 import os
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -31,14 +21,19 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-# COMMAND ----------
-
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    ACCENT_COLOR,
+    GROKKING_ALPHA,
+    GROKKING_SHADE,
+    MAIN_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    configure_grokking_runtime,
+    notebook_param,
+    set_paper_style,
+    write_json,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -236,7 +231,10 @@ def effective_dimension_series(run: dict, t_grok: float) -> tuple[np.ndarray, np
 
 
 def bw_series(run: dict, t_grok: float) -> tuple[np.ndarray, np.ndarray]:
-    data = load_json(result_root(run) / "grokking_bw_geodesic" / "bw_geodesic_results.json")
+    root = result_root(run)
+    current = root / "grokking_resolvent_bw" / "resolvent_bw_results.json"
+    legacy = root / "grokking_bw_geodesic" / "bw_geodesic_results.json"
+    data = load_json(current if current.exists() else legacy)
     series = data["bw_distances_consecutive"]
     x = np.asarray(series["midpoint_epochs"], dtype=float) - t_grok
     y = np.asarray(series["distances"], dtype=float)
@@ -429,8 +427,6 @@ fig.legend(
 
 fig.savefig(FIG_DIR / "fig_grokking_event_study.pdf")
 fig.savefig(FIG_DIR / "fig_grokking_event_study.png")
-if "display" in globals():
-    display(fig)
 plt.close(fig)
 
 print(f"Saved: {FIG_DIR / 'fig_grokking_event_study.pdf'}")

@@ -10,20 +10,11 @@
 # MAGIC - Normalised Laplacian eigenvalue trajectories
 # MAGIC - Figure: fig_eigenvalue_evolution.pdf
 
-# COMMAND ----------
+import gc
+import os
+import sys
 
-
-# MAGIC %pip install -q scikit-learn scipy matplotlib
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import os, gc, json
 import numpy as np
-from pathlib import Path
 from sklearn.decomposition import PCA
 import matplotlib
 matplotlib.use("Agg")
@@ -31,12 +22,16 @@ import matplotlib.pyplot as plt
 
 # COMMAND ----------
 
-import os
-import sys
-from pathlib import Path
-
 sys.path.insert(0, os.environ["THESIS_SHARED_DIR"])
-from runtime import *
+from runtime import (
+    VALIDATION_COLOR,
+    build_normalised_laplacian,
+    configure_grokking_runtime,
+    laplacian_spectrum,
+    load_training_meta,
+    set_paper_style,
+    shade_grokking_window,
+)
 
 GROKKING = configure_grokking_runtime()
 ROOT = GROKKING.root
@@ -152,9 +147,7 @@ ax.grid(True, alpha=0.3)
 fig.subplots_adjust(left=0.10, right=0.76, bottom=0.08, top=0.95, hspace=0.36)
 fig.savefig(FIG_DIR / "fig_eigenvalue_evolution.pdf")
 fig.savefig(FIG_DIR / "fig_eigenvalue_evolution.png")
-if "display" in globals():
-    display(fig)
-print(f"Saved: fig_eigenvalue_evolution.pdf/.png")
+print("Saved: fig_eigenvalue_evolution.pdf/.png")
 plt.close(fig)
 
 # COMMAND ----------
