@@ -2,13 +2,15 @@ import csv
 import json
 import os
 import string
+import tempfile
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from grokking_summary_helpers import effective_dimension, mean_sd, summarise_transition_series
-from runtime import ensure_dir, write_json
+from .config import ExperimentConfig
+from .runtime import ensure_dir, write_json
+from .summary import effective_dimension, mean_sd, summarise_transition_series
 
 
 def _format_config_value(value: str, context: dict[str, str]) -> str:
@@ -32,10 +34,11 @@ def load_seed_sweep_config(path: str | Path) -> dict[str, Any]:
     path = Path(path)
     with path.open("r", encoding="utf-8") as f:
         config = json.load(f)
-    roots = {
-        key: _format_config_value(str(value), {})
-        for key, value in config.get("roots", {}).items()
-    }
+    repo_root = next((parent for parent in path.resolve().parents if (parent / ".git").exists()), Path.cwd())
+    roots = {}
+    for key, value in config.get("roots", {}).items():
+        root = Path(_format_config_value(str(value), {}))
+        roots[key] = str(root if root.is_absolute() else (repo_root / root).resolve())
     config = _expand_config_values(config, roots)
     config["roots"] = roots
     return config
@@ -64,11 +67,12 @@ def activation_status(activation_dir: str | Path, epochs: list[int]) -> dict[str
 def training_parameters(run: dict[str, Any], training_defaults: dict[str, Any]) -> dict[str, str]:
     params = {
         "THESIS_DATA_ROOT": str(run["output_root"]),
-        "THESIS_SHARED_DIR": os.environ["THESIS_SHARED_DIR"],
         "GROKKING_ACTIVATION_DIR": str(run["activation_dir"]),
         "GROKKING_DATA_SEED": str(run["data_seed"]),
         "GROKKING_PROBE_SEED": str(run["probe_seed"]),
-        "GROKKING_TMP_DIR": str(run.get("tmp_dir", f"/tmp/grokking_seed_sweep_{run['key']}")),
+        "GROKKING_TMP_DIR": str(
+            run.get("tmp_dir", Path(tempfile.gettempdir()) / f"grokking_seed_sweep_{run['key']}")
+        ),
         "GROKKING_FORCE": str(bool(run.get("force_retrain", False))).lower(),
     }
     mapping = {
@@ -95,7 +99,6 @@ def analysis_parameters(
     return {
         "THESIS_WORKSPACE_ROOT": workspace_root,
         "THESIS_DATA_ROOT": str(run["output_root"]),
-        "THESIS_SHARED_DIR": os.environ["THESIS_SHARED_DIR"],
         "GROKKING_ACTIVATION_DIR": str(run["activation_dir"]),
         "GROKKING_CHART_VARIANT": f"{chart_variant_prefix}_{run['data_seed']}",
         "TASKS": ",".join(task_keys),
@@ -123,7 +126,9 @@ def summarise_effective_dimension(activation_dir: str | Path, final_epoch: int) 
     out: dict[str, float | None] = {}
     for epoch in [0, 3000, 4000, final_epoch]:
         path = activation_dir / f"act_{epoch}.npy"
-        out[f"d_eff_{epoch}"] = effective_dimension(np.load(path).astype(np.float64)) if path.exists() else None
+        out[f"d_eff_{epoch}"] = (
+            effective_dimension(np.load(path).astype(np.float64)) if path.exists() else None
+        )
     d0 = out.get("d_eff_0")
     df = out.get(f"d_eff_{final_epoch}")
     out["drop_0_to_final"] = float(d0 - df) if d0 is not None and df is not None else None
@@ -165,7 +170,9 @@ def summarise_resolvent_bw(output_root: str | Path) -> dict[str, Any]:
 
 
 def summarise_heat_kernel(output_root: str | Path, tau: float = 1.0) -> dict[str, Any]:
-    data = read_json_if_present(Path(output_root) / "results" / "grokking_heat_kernel" / "heat_kernel_bw_results.json")
+    data = read_json_if_present(
+        Path(output_root) / "results" / "grokking_heat_kernel" / "heat_kernel_bw_results.json"
+    )
     if data is None:
         return {"available": False}
     key = str(tau)
@@ -175,7 +182,9 @@ def summarise_heat_kernel(output_root: str | Path, tau: float = 1.0) -> dict[str
     return {
         "available": True,
         "tau": tau,
-        "summary": summarise_transition_series(series.get("midpoint_epochs", []), series.get("distances", [])),
+        "summary": summarise_transition_series(
+            series.get("midpoint_epochs", []), series.get("distances", [])
+        ),
     }
 
 
@@ -188,7 +197,8 @@ def summarise_hodge(output_root: str | Path) -> dict[str, Any]:
 
     pairs = data.get("pairs", [])
     midpoints = np.asarray([row["midpoint"] for row in pairs], dtype=float)
-    transition = (midpoints >= 1500) & (midpoints <= 4000)
+    config = ExperimentConfig.from_environment()
+    transition = (midpoints >= config.transition_start) & (midpoints <= config.transition_end)
 
     def transition_mean(key: str) -> float | None:
         values = np.asarray([row[key] for row in pairs], dtype=float)
@@ -248,10 +258,16 @@ def aggregate_seed_summaries(run_summaries: list[dict[str, Any]]) -> dict[str, A
             "summary",
             "transition_peak_over_post_mean",
         ],
-        "heat_tau_1_transition_peak_over_post": ["heat_kernel_tau_1", "summary", "transition_peak_over_post_mean"],
+        "heat_tau_1_transition_peak_over_post": [
+            "heat_kernel_tau_1",
+            "summary",
+            "transition_peak_over_post_mean",
+        ],
     }
     return {
-        name: mean_sd([nested_value(summary, path) for summary in run_summaries], ignore_none=True, include_n=True)
+        name: mean_sd(
+            [nested_value(summary, path) for summary in run_summaries], ignore_none=True, include_n=True
+        )
         for name, path in metrics.items()
     }
 

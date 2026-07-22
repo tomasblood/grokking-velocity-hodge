@@ -1,5 +1,7 @@
 import numpy as np
 
+from .config import ExperimentConfig
+
 
 def effective_dimension(x: np.ndarray) -> float:
     x = np.asarray(x, dtype=np.float64)
@@ -10,12 +12,21 @@ def effective_dimension(x: np.ndarray) -> float:
     return float((s1 * s1 / s2) if s2 > 0 else 0.0)
 
 
-def summarise_transition_series(midpoints, values) -> dict[str, float | None]:
+def summarise_transition_series(
+    midpoints,
+    values,
+    transition_start: float | None = None,
+    transition_end: float | None = None,
+) -> dict[str, float | None]:
+    config = ExperimentConfig.from_environment()
+    transition_start = config.transition_start if transition_start is None else transition_start
+    transition_end = config.transition_end if transition_end is None else transition_end
     mids = np.asarray(midpoints, dtype=np.float64)
     vals = np.asarray(values, dtype=np.float64)
-    transition = vals[(mids >= 1500) & (mids <= 4000)]
-    post = vals[mids > 4000]
-    initial = vals[mids == 250]
+    transition = vals[(mids >= transition_start) & (mids <= transition_end)]
+    post = vals[mids > transition_end]
+    initial_midpoint = config.save_every / 2
+    initial = vals[mids == initial_midpoint]
     post_mean = float(np.mean(post)) if len(post) else None
     transition_peak = float(np.max(transition)) if len(transition) else None
     transition_mean = float(np.mean(transition)) if len(transition) else None

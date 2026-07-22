@@ -1,7 +1,7 @@
 {
   "roots": {
-    "canonical_data": "/dbfs/FileStore/thesis",
-    "seed_sweep": "/dbfs/FileStore/thesis_seed_sweep"
+    "canonical_data": "data/canonical",
+    "seed_sweep": "data/seed_sweep"
   },
   "summary_dir": "{seed_sweep}/grokking_summary",
   "analysis_tasks": [
@@ -30,7 +30,7 @@
       "activation_dir": "{canonical_data}/results/grokking_acts_v6",
       "output_root": "{seed_sweep}/grokking_seed598",
       "train_if_missing": false,
-      "tmp_dir": "/tmp/grokking_seed_sweep_seed598"
+      "tmp_dir": "{seed_sweep}/tmp/seed598"
     },
     {
       "key": "seed599_probe43",
@@ -42,7 +42,7 @@
       "activation_dir": "{seed_sweep}/grokking_seed599/results/grokking_acts_v6",
       "output_root": "{seed_sweep}/grokking_seed599",
       "train_if_missing": true,
-      "tmp_dir": "/tmp/grokking_seed_sweep_seed599"
+      "tmp_dir": "{seed_sweep}/tmp/seed599"
     },
     {
       "key": "seed777_probe43",
@@ -54,7 +54,7 @@
       "activation_dir": "{seed_sweep}/grokking_seed777/results/grokking_acts_v6",
       "output_root": "{seed_sweep}/grokking_seed777",
       "train_if_missing": true,
-      "tmp_dir": "/tmp/grokking_seed_sweep_seed777"
+      "tmp_dir": "{seed_sweep}/tmp/seed777"
     }
   ]
 }

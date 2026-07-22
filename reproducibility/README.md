@@ -1,55 +1,109 @@
 # Grokking reproduction code
 
-This directory contains the exported code used to reproduce the grokking
-experiments reported in `paper.tex`.
+This directory contains the training, analysis, validation, and orchestration
+scripts used by `paper.tex`. Reusable code and the central configuration live in
+the installable `grokking_velocity_hodge` package under `src/`.
 
-## Structure
+## Installation
 
-- `Grokking/Training/01_train_reproducible.py` trains the modular-addition model.
-- `Grokking/Analysis/01_velocity_hodge.py` computes the pointwise velocity-field Hodge decomposition.
-- `Grokking/Analysis/02_effdim_pca.py` computes effective dimension.
-- `Grokking/Analysis/03_eigenvalues.py` computes the diffusion-operator eigenspectra.
-- `Grokking/Analysis/04_resolvent_bw.py` computes consecutive global resolvent BW distances.
-- `Grokking/Analysis/05_heat_kernel.py` computes heat-kernel BW distances.
-- `Grokking/Analysis/07_circular_coords.py` computes circular coordinates.
-- `Grokking/Analysis/09_probe_subset_robustness.py` evaluates probe-subset robustness.
-- `Grokking/Analysis/10_event_study.py` constructs the seed-aligned event study.
-- `Grokking/Pipelines/main_charts.py` runs the paper analysis stack.
-- `Grokking/Pipelines/seed_sweep.py` runs the configured robustness seeds.
-- `Shared/` contains common runtime and numerical helpers.
+From the repository root, install the analysis package with:
+
+```powershell
+python -m pip install -e .
+```
+
+Install the model-training dependencies only when retraining:
+
+```powershell
+python -m pip install -e ".[training]"
+```
+
+For development and linting:
+
+```powershell
+python -m pip install -e ".[dev,training]"
+```
 
 ## Configuration
 
-The scripts can run as exported Databricks notebooks or as ordinary Python
-programs. Configure their input and output locations with:
+`ExperimentConfig` in `src/grokking_velocity_hodge/config.py` is the single
+source of truth. Analyses use checkpoint epochs recorded in `training.json` and
+fall back to the configured epoch schedule only when metadata is unavailable.
 
-- `THESIS_WORKSPACE_ROOT`: directory containing this `reproducibility` folder.
-- `THESIS_DATA_ROOT`: root for activations, numerical results, and generated figures.
-- `THESIS_SHARED_DIR`: absolute path to `reproducibility/Shared`.
-- `GROKKING_ACTIVATION_DIR`: optional override for saved activations.
+Common optional overrides are:
 
-Install dependencies with:
+- `THESIS_DATA_ROOT`: data, results, and generated-figure root; defaults to the repository root.
+- `GROKKING_ACTIVATION_DIR`: activation directory; defaults below `THESIS_DATA_ROOT/results`.
+- `GROKKING_FIGURE_DIR`: generated-figure directory.
+- `GROKKING_PCA_DIM`, `GROKKING_KNN`, `GROKKING_K_SPEC`, and `GROKKING_RESOLVENT_EPS`.
+- `GROKKING_HODGE_PCA_DIM` and `GROKKING_HODGE_BASIS`.
+- `GROKKING_N_EPOCHS`, `GROKKING_SAVE_EVERY`, and the other training overrides documented by the config class.
+
+No `THESIS_SHARED_DIR` or manual `sys.path` configuration is required.
+
+## Main workflow
+
+Train the canonical model when activation snapshots are unavailable:
 
 ```powershell
-pip install -r reproducibility/requirements.txt
+python reproducibility/Grokking/Training/01_train_reproducible.py
 ```
 
-Run the focused regression suite with:
+Run the paper analysis stack:
+
+```powershell
+python reproducibility/Grokking/Pipelines/main_charts.py
+```
+
+Use `--dry-run` to inspect the planned tasks without requiring activation data.
+
+The portable seed sweep is configured in
+`Grokking/config/seed_sweep.json`; its relative paths resolve from the repository
+root:
+
+```powershell
+python reproducibility/Grokking/Pipelines/seed_sweep.py
+```
+
+## Validation
+
+Run all regression tests, including real DiffusionGeometry calibration of exact,
+coexact, and harmonic fields:
 
 ```powershell
 python -m unittest discover -s reproducibility/tests -v
 ```
 
-Train the canonical model when activations are unavailable, then run:
+Persist the synthetic calibration result with:
 
 ```powershell
-$env:THESIS_SHARED_DIR = (Resolve-Path reproducibility/Shared)
-python reproducibility/Grokking/Pipelines/main_charts.py
+python reproducibility/Grokking/Validation/01_synthetic_hodge.py
 ```
 
-The optional seed sweep is configured in
-`Grokking/config/seed_sweep.json` and run with:
+Run the empirical Hodge sensitivity sweep over probe subsets, one-at-a-time
+PCA/kNN/basis changes, and a correspondence-permutation null with:
 
 ```powershell
-python reproducibility/Grokking/Pipelines/seed_sweep.py
+python reproducibility/Grokking/Analysis/11_hodge_robustness.py
 ```
+
+The `GROKKING_HODGE_SWEEP_*` environment variables can reduce or expand this
+sweep without editing the analysis source.
+
+Historical BW cache provenance and the comparison command are documented in
+`reproducibility/PROVENANCE.md`. GitHub Actions runs linting, compilation, tests,
+the real Hodge calibration, and a pipeline dry run on every push and pull request.
+
+## Script map
+
+- `Training/01_train_reproducible.py`: modular-addition training and activations.
+- `Analysis/01_velocity_hodge.py`: pointwise velocity Hodge decomposition.
+- `Analysis/02_effdim_pca.py`: effective dimension and Fourier diagnostics.
+- `Analysis/03_eigenvalues.py`: diffusion-operator eigenspectra.
+- `Analysis/04_resolvent_bw.py`: consecutive global resolvent BW distances.
+- `Analysis/05_heat_kernel.py`: heat-kernel BW distances.
+- `Analysis/07_circular_coords.py`: circular-coordinate recovery.
+- `Analysis/09_probe_subset_robustness.py`: probe-subset robustness.
+- `Analysis/10_event_study.py`: seed-aligned event study.
+- `Analysis/11_hodge_robustness.py`: Hodge parameter, subset, and null checks.
+- `Validation/`: synthetic calibration and numerical-provenance audits.

@@ -1,20 +1,14 @@
-# ruff: noqa: E402
-
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 
-
-SHARED_DIR = Path(__file__).resolve().parents[1] / "Shared"
-sys.path.insert(0, str(SHARED_DIR))
-
-from grokking_seed_sweep_helpers import summarise_hodge, summarise_resolvent_bw
-from grokking_summary_helpers import effective_dimension, mean_sd, summarise_transition_series
-from runtime import (
+from grokking_velocity_hodge.config import ExperimentConfig
+from grokking_velocity_hodge.provenance import compare_bw_files
+from grokking_velocity_hodge.runtime import (
     build_normalised_laplacian,
     bw_distance,
     covariance_in_reference_basis,
@@ -24,9 +18,32 @@ from runtime import (
     hodge_decompose_velocity,
     laplacian_spectrum,
 )
+from grokking_velocity_hodge.seed_sweep import (
+    load_seed_sweep_config,
+    summarise_hodge,
+    summarise_resolvent_bw,
+)
+from grokking_velocity_hodge.summary import effective_dimension, mean_sd, summarise_transition_series
 
 
 class RuntimeTests(unittest.TestCase):
+    def test_environment_configuration_and_metadata_epochs(self):
+        with patch.dict(
+            "os.environ",
+            {"GROKKING_N_EPOCHS": "1000", "GROKKING_SAVE_EVERY": "250", "GROKKING_KNN": "9"},
+            clear=False,
+        ):
+            config = ExperimentConfig.from_environment()
+        self.assertEqual(config.epochs, [0, 250, 500, 750, 1000])
+        self.assertEqual(config.knn, 9)
+        self.assertEqual(config.checkpoint_epochs({"saved_epochs": [0, 400, 800]}), [0, 400, 800])
+
+    def test_seed_sweep_paths_resolve_from_repository_root(self):
+        config_path = Path(__file__).resolve().parents[1] / "Grokking" / "config" / "seed_sweep.json"
+        config = load_seed_sweep_config(config_path)
+        for root in config["roots"].values():
+            self.assertTrue(Path(root).is_absolute())
+
     def test_edge_padded_moving_average(self):
         actual = edge_padded_moving_average(np.array([1.0, 2.0, 3.0]), window=3)
         np.testing.assert_allclose(actual, [4.0 / 3.0, 2.0, 8.0 / 3.0])
@@ -125,11 +142,14 @@ class SummaryTests(unittest.TestCase):
         self.assertAlmostEqual(summary["transition_peak_over_post_mean"], 8.0 / 3.0)
 
     def test_mean_sd_ignores_missing_values_when_requested(self):
-        self.assertEqual(mean_sd([1.0, None, 3.0], ignore_none=True, include_n=True), {
-            "mean": 2.0,
-            "sd": np.sqrt(2.0),
-            "n": 2,
-        })
+        self.assertEqual(
+            mean_sd([1.0, None, 3.0], ignore_none=True, include_n=True),
+            {
+                "mean": 2.0,
+                "sd": np.sqrt(2.0),
+                "n": 2,
+            },
+        )
 
     def test_hodge_seed_summary_uses_transition_window(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -168,6 +188,30 @@ class SummaryTests(unittest.TestCase):
         self.assertTrue(summary["available"])
         self.assertEqual(summary["summary"]["transition_peak"], 8.0)
         self.assertEqual(summary["summary"]["post_mean"], 3.0)
+
+    def test_bw_provenance_comparison_distinguishes_exactness_from_stability(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cached_path = Path(directory) / "cached.json"
+            rerun_path = Path(directory) / "rerun.json"
+            midpoint_epochs = [250, 1750, 2250, 4250, 4750]
+            cached = {
+                "bw_distances_consecutive": {
+                    "midpoint_epochs": midpoint_epochs,
+                    "distances": [10.0, 6.0, 8.0, 2.0, 4.0],
+                }
+            }
+            rerun = {
+                "bw_distances_consecutive": {
+                    "midpoint_epochs": midpoint_epochs,
+                    "distances": [10.0, 6.0, 8.01, 2.0, 4.0],
+                }
+            }
+            cached_path.write_text(json.dumps(cached), encoding="utf-8")
+            rerun_path.write_text(json.dumps(rerun), encoding="utf-8")
+            report = compare_bw_files(cached_path, rerun_path)
+
+        self.assertFalse(report["series_exactly_equal"])
+        self.assertTrue(report["conclusion_stable"])
 
 
 if __name__ == "__main__":

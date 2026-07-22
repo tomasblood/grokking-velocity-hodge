@@ -4,20 +4,20 @@ from pathlib import Path
 import numpy as np
 from sklearn.decomposition import PCA
 
-from grokking_summary_helpers import effective_dimension, mean_sd, summarise_transition_series
-from runtime import (
+from .runtime import (
     build_normalised_laplacian,
     bw_distance,
     covariance_in_reference_basis,
     heat_kernel_in_reference_basis,
     laplacian_spectrum,
 )
+from .summary import effective_dimension, mean_sd, summarise_transition_series
 
 
 def aggregate_probe_subsets(subsets: list[dict], tau_values: list[float]) -> dict:
     eff0 = [s["effective_dimension_summary"]["d_eff_0"] for s in subsets]
-    eff25 = [s["effective_dimension_summary"]["d_eff_25000"] for s in subsets]
-    eff_ratio = [s["effective_dimension_summary"]["ratio_25000_over_0"] for s in subsets]
+    eff_final = [s["effective_dimension_summary"]["d_eff_final"] for s in subsets]
+    eff_ratio = [s["effective_dimension_summary"]["ratio_final_over_0"] for s in subsets]
 
     bw_init = [s["bw_resolvent"]["summary"]["initial_0_500"] for s in subsets]
     bw_peak = [s["bw_resolvent"]["summary"]["transition_peak"] for s in subsets]
@@ -28,7 +28,9 @@ def aggregate_probe_subsets(subsets: list[dict], tau_values: list[float]) -> dic
     for tau in tau_values:
         key = str(tau)
         heat[key] = {
-            "transition_peak": mean_sd([s["heat_kernel"]["summary"][key]["transition_peak"] for s in subsets]),
+            "transition_peak": mean_sd(
+                [s["heat_kernel"]["summary"][key]["transition_peak"] for s in subsets]
+            ),
             "post_mean": mean_sd([s["heat_kernel"]["summary"][key]["post_mean"] for s in subsets]),
             "transition_peak_over_post_mean": mean_sd(
                 [s["heat_kernel"]["summary"][key]["transition_peak_over_post_mean"] for s in subsets]
@@ -45,9 +47,9 @@ def aggregate_probe_subsets(subsets: list[dict], tau_values: list[float]) -> dic
     return {
         "effective_dimension": {
             "d_eff_0": mean_sd(eff0),
-            "d_eff_25000": mean_sd(eff25),
-            "ratio_25000_over_0": mean_sd(eff_ratio),
-            "n_subsets_drop": int(sum(a > b for a, b in zip(eff0, eff25))),
+            "d_eff_final": mean_sd(eff_final),
+            "ratio_final_over_0": mean_sd(eff_ratio),
+            "n_subsets_drop": int(sum(a > b for a, b in zip(eff0, eff_final))),
         },
         "bw_resolvent": {
             "initial_0_500": mean_sd(bw_init),
@@ -112,16 +114,30 @@ def analyse_probe_subset(
         bw_distances.append(bw_distance(covariances[epoch_a], covariances[epoch_b]))
         for tau in tau_values:
             heat_series[str(tau)]["midpoints"].append(midpoint)
-            heat_series[str(tau)]["distances"].append(bw_distance(heat_covs[tau][epoch_a], heat_covs[tau][epoch_b]))
+            heat_series[str(tau)]["distances"].append(
+                bw_distance(heat_covs[tau][epoch_a], heat_covs[tau][epoch_b])
+            )
 
+    final_epoch = valid_epochs[-1]
+    d_eff_initial = eff_dims.get("0")
+    d_eff_final = eff_dims.get(str(final_epoch))
     eff_summary = {
+        "final_epoch": final_epoch,
         "d_eff_0": eff_dims.get("0"),
         "d_eff_3000": eff_dims.get("3000"),
         "d_eff_4000": eff_dims.get("4000"),
-        "d_eff_25000": eff_dims.get("25000"),
-        "drop_0_to_25000": eff_dims.get("0") - eff_dims.get("25000"),
-        "ratio_25000_over_0": eff_dims.get("25000") / eff_dims.get("0"),
+        "d_eff_final": d_eff_final,
+        "drop_0_to_final": d_eff_initial - d_eff_final,
+        "ratio_final_over_0": d_eff_final / d_eff_initial,
     }
+    if final_epoch == 25_000:
+        eff_summary.update(
+            {
+                "d_eff_25000": d_eff_final,
+                "drop_0_to_25000": eff_summary["drop_0_to_final"],
+                "ratio_25000_over_0": eff_summary["ratio_final_over_0"],
+            }
+        )
 
     return {
         "seed": seed,

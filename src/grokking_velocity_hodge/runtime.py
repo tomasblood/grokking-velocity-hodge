@@ -1,19 +1,20 @@
-from dataclasses import dataclass
-from pathlib import Path
 import json
 import os
+from dataclasses import dataclass
+from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.linalg import eigh
 from matplotlib.colors import ListedColormap, hsv_to_rgb, rgb_to_hsv
+from scipy.linalg import eigh
 from sklearn.linear_model import Ridge
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 
+from .config import ExperimentConfig
 
 # --- Plot constants
 
@@ -26,13 +27,12 @@ ACCENT_COLOR = "#4C78A8"
 SECONDARY_COLOR = "#D1884F"
 GREY_COLOR = "#5F6670"
 
-GROKKING_START = 1500
-GROKKING_END = 4000
 GROKKING_SHADE = "#F2C879"
 GROKKING_ALPHA = 0.16
 
 
 # --- Notebook parameters and paths
+
 
 # find databricks helpers when present
 def get_dbutils_or_none():
@@ -108,12 +108,11 @@ class GrokkingRuntime:
     def result_dir(self, name: str) -> Path:
         return ensure_dir(self.root / "results" / name)
 
+
 def configure_grokking_runtime(chart_variant: str | None = None) -> GrokkingRuntime:
     root = thesis_root()
     chart_variant = (
-        chart_variant
-        if chart_variant is not None
-        else notebook_param("GROKKING_CHART_VARIANT", "new_charts")
+        chart_variant if chart_variant is not None else notebook_param("GROKKING_CHART_VARIANT", "new_charts")
     ).strip()
     fig_subdir = grokking_figure_subdir(chart_variant)
     figure_dir = Path(notebook_param("GROKKING_FIGURE_DIR", str(root / "figures" / fig_subdir)))
@@ -130,6 +129,7 @@ def configure_grokking_runtime(chart_variant: str | None = None) -> GrokkingRunt
 
 
 # --- Figure style helpers
+
 
 def set_paper_style() -> None:
     plt.rcParams.update(
@@ -166,9 +166,10 @@ def set_paper_style() -> None:
 
 
 def shade_grokking_window(ax, label: bool = False) -> None:
+    config = ExperimentConfig.from_environment()
     ax.axvspan(
-        GROKKING_START,
-        GROKKING_END,
+        config.transition_start,
+        config.transition_end,
         color=GROKKING_SHADE,
         alpha=GROKKING_ALPHA,
         zorder=0,
@@ -186,6 +187,7 @@ def dimmed_phase_cmap(name: str = "hsv", saturation: float = 0.62, value: float 
 
 
 # --- Data and JSON helpers
+
 
 def load_training_meta(act_dir: str | Path) -> dict:
     with (Path(act_dir) / "training.json").open("r", encoding="utf-8") as f:
@@ -250,6 +252,7 @@ def bw_distance(s0: np.ndarray, s1: np.ndarray) -> float:
 
 # --- Graph and spectral operator helpers
 
+
 def build_normalised_laplacian(x: np.ndarray, k: int = 15) -> np.ndarray:
     n = x.shape[0]
     if n == 0:
@@ -279,6 +282,7 @@ def laplacian_spectrum(laplacian: np.ndarray, k: int = 30) -> tuple[np.ndarray, 
 
 
 # --- Spectral covariance coordinates
+
 
 # project the current covariance into the reference eigenbasis
 def covariance_in_reference_basis(
@@ -314,6 +318,7 @@ def heat_kernel_in_reference_basis(
 
 
 # --- Fourier and circular coordinate helpers
+
 
 def dominant_fourier_frequency(x: np.ndarray, labels: np.ndarray, p: int = 113) -> tuple[int, np.ndarray]:
     powers = np.zeros(p)
@@ -463,6 +468,7 @@ def dg_circular_coordinate(
 
 # --- Sampling and Hodge decomposition helpers
 
+
 def farthest_point_sample(points: np.ndarray, n: int) -> np.ndarray:
     n = min(int(n), len(points))
     if n <= 0:
@@ -511,5 +517,6 @@ def hodge_decompose_velocity(
         "harmonic": float(e_harmonic / e_sum),
         "total_energy": float(e_total),
     }
+
 
 # End of shared runtime helpers.

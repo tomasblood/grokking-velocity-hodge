@@ -3,6 +3,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+*.egg-info/
+build/
+dist/
 .env
 .venv/
 venv/
@@ -36,6 +39,7 @@ _render/
 
 # Legacy figure outside the scoped manuscript
 figures/fig_bw_geodesic.pdf
+figures/grokking*/
 
 # Local import staging
 .template-source/

@@ -1,5 +1,7 @@
 # Decomposed Velocity Fields During Grokking
 
+[![CI](https://github.com/tomasblood/grokking-velocity-hodge/actions/workflows/ci.yml/badge.svg)](https://github.com/tomasblood/grokking-velocity-hodge/actions/workflows/ci.yml)
+
 This repository contains the submission manuscript and the Grokking
 reproduction code derived from
 [`tomasblood/geometric-ml-thesis-sample`](https://github.com/tomasblood/geometric-ml-thesis-sample).
@@ -28,11 +30,14 @@ latexmk -pdf paper.tex
 See [`reproducibility/README.md`](reproducibility/README.md) for configuration,
 training, and analysis instructions.
 
+The reusable analysis code is installed from `src/grokking_velocity_hodge`;
+the scripts do not depend on notebook-only path injection.
+
 ## Current status
 
 The draft is venue-neutral. Before submission it still needs the target venue's
 document class, author metadata, any required data/code availability statement,
-and the completed Hodge robustness sweep identified in the thesis.
+and the completed empirical Hodge robustness sweep identified in the thesis.
 
 ## Provenance
 

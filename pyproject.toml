@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grokking-velocity-hodge"
+version = "0.1.0"
+description = "Reproducible geometric diagnostics for representation dynamics during grokking"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy>=2.1,<2.6",
+    "scipy>=1.15,<1.18",
+    "matplotlib>=3.9,<3.11",
+    "scikit-learn>=1.6,<1.9",
+    "diffusion-geometry @ git+https://github.com/Iolo-Jones/DiffusionGeometry.git@f5dc795557d07b32795c0bb6bedf465246d999eb",
+]
+
+[project.optional-dependencies]
+training = [
+    "torch>=2.7,<2.11",
+    "transformer-lens==2.17.0",
+    "einops>=0.7,<0.9",
+]
+dev = ["ruff>=0.15,<0.16"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

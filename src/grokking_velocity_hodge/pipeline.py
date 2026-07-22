@@ -1,87 +1,13 @@
-# Small dbutils stand ins for local runs.
-# this lets the databricks notebooks run as plain python during checks
+"""Run the analysis scripts locally or through Databricks notebooks."""
 
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import runpy
 import sys
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Iterable
 
 REPRO_DIR_NAMES = ("reproducibility", "Thesis_Reproducibility_Code")
-
-
-class _LocalString(str):
-    def get(self) -> str:
-        return str(self)
-
-
-class _LocalNotebookContext:
-    def __init__(self, notebook_path: str = ""):
-        self._notebook_path = notebook_path
-
-    def notebookPath(self) -> _LocalString:
-        return _LocalString(self._notebook_path)
-
-    def apiToken(self) -> _LocalString:
-        return _LocalString(os.environ.get("QWEN3_API_TOKEN", os.environ.get("DATABRICKS_TOKEN", "")))
-
-
-class _LocalNotebook:
-    def __init__(self, dbutils_obj: "_LocalDbutils", notebook_path: str):
-        self.entry_point = self
-        self._dbutils_obj = dbutils_obj
-        self._notebook_path = notebook_path
-
-    def __call__(self) -> "_LocalNotebook":
-        return self
-
-    def getDbutils(self) -> "_LocalDbutils":
-        return self._dbutils_obj
-
-    def getContext(self) -> _LocalNotebookContext:
-        return _LocalNotebookContext(self._notebook_path)
-
-    def run(self, path: str, timeout_seconds: int, params: dict[str, str] | None = None) -> str:
-        run_workspace_notebook(path, params or {}, timeout_seconds=timeout_seconds, dry_run=False)
-        return "OK"
-
-    def exit(self, value: str = "") -> None:
-        raise SystemExit(value)
-
-
-class _LocalWidgets:
-    def __init__(self, params: dict[str, str]):
-        self._params = params
-
-    def get(self, name: str) -> str:
-        return self._params.get(name, os.environ.get(name, ""))
-
-
-class _LocalDbutils:
-    class _Library:
-        def restartPython(self) -> None:
-            return None
-
-    def __init__(self, params: dict[str, str] | None = None, notebook_path: str = ""):
-        self.widgets = _LocalWidgets(params or {})
-        self.library = self._Library()
-        self.notebook = _LocalNotebook(self, notebook_path)
-
-
-class _LocalSparkConf:
-    def get(self, name: str, default: str | None = None) -> str:
-        if name == "spark.databricks.workspaceUrl":
-            value = os.environ.get("DATABRICKS_WORKSPACE_URL", "")
-            if value:
-                return value
-        if default is not None:
-            return default
-        raise KeyError(name)
-
-
-class _LocalSpark:
-    conf = _LocalSparkConf()
 
 
 def get_dbutils():
@@ -143,9 +69,8 @@ def workspace_root() -> str:
         for parent in [here.parent, *here.parents]:
             if parent.name in REPRO_DIR_NAMES:
                 return str(parent.parent)
-    fallback = os.environ.get("THESIS_WORKSPACE_ROOT", "").strip()
-    assert fallback, "Set THESIS_WORKSPACE_ROOT"
-    return fallback.rstrip("/")
+        return str(_find_repo_root(here))
+    return str(Path.cwd())
 
 
 def reproduction_code_dir(workspace_root_value: str | None = None) -> str:
@@ -221,30 +146,19 @@ def _notebook_to_local_path(path: str) -> Path:
 def _run_local_notebook(path: str, params: dict[str, str]) -> None:
     local_path = _notebook_to_local_path(path)
     old_env = {key: os.environ.get(key) for key in params}
-    old_path = list(sys.path)
+    old_argv = sys.argv
     try:
         for key, value in params.items():
             os.environ[key] = str(value)
-        shared_dir = local_path.parents[2] / "Shared" if len(local_path.parents) >= 3 else None
-        if shared_dir is not None and shared_dir.exists():
-            shared_text = str(shared_dir)
-            if shared_text not in sys.path:
-                sys.path.append(shared_text)
-        runpy.run_path(
-            str(local_path),
-            run_name="__main__",
-            init_globals={
-                "dbutils": _LocalDbutils(params, str(local_path)),
-                "spark": _LocalSpark(),
-            },
-        )
+        sys.argv = [str(local_path)]
+        runpy.run_path(str(local_path), run_name="__main__")
     finally:
+        sys.argv = old_argv
         for key, value in old_env.items():
             if value is None:
                 os.environ.pop(key, None)
             else:
                 os.environ[key] = value
-        sys.path[:] = old_path
 
 
 def verify_task_outputs(task: PipelineTask, figure_root: Path, figure_subdir: str, data_root: Path) -> None:
