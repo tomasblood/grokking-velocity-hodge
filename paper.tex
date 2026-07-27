@@ -18,6 +18,8 @@
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\BW}{\mathrm{BW}}
+\newcommand{\addedtext}[1]{\textcolor{blue}{#1}}
+\pdfstringdefDisableCommands{\def\addedtext#1{#1}}
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
@@ -30,7 +32,7 @@
 \maketitle
 
 \begin{abstract}
-Grokking refers to the phenomenon of neural networks hitting near-perfect training accuracy early and then taking orders of magnitude more steps to generalise on a held-out dataset \citep{power2022grokking}. The primary contribution is a pointwise velocity-field Hodge decomposition across three grokking runs. The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). Across three seeds the coexact fraction in this window is 0.48--0.56, peaking at the start of the transition in two of them. Effective dimensionality and resolvent BW distance provide global corroborating diagnostics. Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
+Grokking refers to the phenomenon of neural networks hitting near-perfect training accuracy early and then taking orders of magnitude more steps to generalise on a held-out dataset \citep{power2022grokking}. \addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition} across three grokking runs. The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). Across three seeds the coexact fraction in this window is 0.48--0.56, peaking at the start of the transition in two of them. \addedtext{Effective dimensionality and resolvent BW distance provide global corroborating diagnostics.} Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
 \end{abstract}
 
 \section{Introduction}
@@ -44,17 +46,17 @@ The network first memorises the training set as a lookup table, then gradually f
 \end{equation}
 This clock algorithm needs only a small number of Fourier frequencies. It places the $P$ residue classes on a low-dimensional manifold with the topology of a circle for one frequency or a torus for several.
 
-The primary contribution is a pointwise velocity-field Hodge decomposition across three grokking runs. The transition is clearly visible in the representation and in the global corroborating diagnostics. Supplementary geometric diagnostics and an audit of the evidential status of these claims appear in the appendix.
+\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition across three grokking runs. The transition is clearly visible in the representation and in the global corroborating diagnostics. Supplementary geometric diagnostics and an audit of the evidential status of these claims appear in the appendix.}
 
-In this paper we study the grokking transition through a primary spatial analysis and complementary global diagnostics. Both are built on a shared representation space made from activation checkpoints.
+\addedtext{In this paper we study the grokking transition through a primary spatial analysis and complementary global diagnostics.} Both are built on a shared representation space made from activation checkpoints.
 
 \begin{enumerate}
-    \item Primary spatial analysis. The probe displacement field $v_i(t) = x_i(t + \Delta t) - x_i(t)$ between consecutive checkpoints is a vector field on the point cloud at time~$t$. We treat it as a degree-1 object and perform Hodge decomposition via DiffusionGeometry, partitioning the velocity into exact (gradient), coexact (curl), and harmonic components.
+    \item \addedtext{Primary spatial analysis.} The probe displacement field $v_i(t) = x_i(t + \Delta t) - x_i(t)$ between consecutive checkpoints is a vector field on the point cloud at time~$t$. We treat it as a degree-1 object and perform Hodge decomposition via DiffusionGeometry, partitioning the velocity into exact (gradient), coexact (curl), and harmonic components.
 
-    \item Global corroborating diagnostics. We track the effective dimension of the centred activation covariance. At each checkpoint we also build the graph Laplacian $L_t$ and derive the regularised inverse, or resolvent covariance, $\Sigma_t = (L_t + \varepsilon I)^{-1}$ on the retained non-trivial spectral subspace, an inversion which emphasises low-frequency structure. We measure the Bures--Wasserstein distance between consecutive Gaussians.
+    \item \addedtext{Global corroborating diagnostics. We track the effective dimension of the centred activation covariance. At each checkpoint we also build the graph Laplacian $L_t$ and derive the regularised inverse, or resolvent covariance, $\Sigma_t = (L_t + \varepsilon I)^{-1}$ on the retained non-trivial spectral subspace, an inversion which emphasises low-frequency structure. We measure the Bures--Wasserstein distance between consecutive Gaussians.}
 \end{enumerate}
 
-The spatial analysis captures what the representation is \emph{doing}, by tracking how activation vectors move between checkpoints. The global diagnostics capture how the representation and its diffusion geometry evolve.
+The spatial \addedtext{analysis} captures what the representation is \emph{doing}, by tracking how activation vectors move between checkpoints. \addedtext{The global diagnostics capture how the representation and its diffusion geometry evolve.}
 
 \section{Experimental Setup}
 
@@ -86,7 +88,7 @@ We reduce $X_t$ to 10 dimensions with PCA. We also project $v_i$ through the sam
 \[
 \omega = \mathrm{d} f + \delta g + h,
 \]
-where $\mathrm{d} f$ is exact (the gradient of a 0-form), $\delta g$ is coexact (the codifferential of a 2-form), and $h$ is harmonic. The three components are orthogonal on a smooth manifold. On a finite point cloud the numerical cross terms are small but non-zero. The raw magnitude charts are very noisy, so to interpret them we look at the composition rather than the raw magnitudes. We report normalised energy fractions $(\hat{e}_{\mathrm{exact}}, \hat{e}_{\mathrm{coexact}}, \hat{e}_{\mathrm{harmonic}})$ that sum to one by construction, telling us how much of the probes' motion is gradient-like, coexact-like, or left in the residual harmonic component. We read the harmonic term conservatively in this chapter: without an independent persistent homology or Betti number calculation we cannot treat the harmonic energy as direct evidence for a topological cycle.
+where $\mathrm{d} f$ is exact (the gradient of a 0-form), $\delta g$ is coexact (the codifferential of a 2-form), and $h$ is harmonic. The three components are orthogonal on a smooth manifold. On a finite point cloud the numerical cross terms are small but non-zero. The raw magnitude charts are very noisy, so to interpret them we look at the composition rather than the raw magnitudes. We report normalised energy fractions $(\hat{e}_{\mathrm{exact}}, \hat{e}_{\mathrm{coexact}}, \hat{e}_{\mathrm{harmonic}})$ that sum to one by construction, telling us how much of the probes' motion is gradient-like, coexact-like, or left in the residual harmonic component. We read the harmonic term conservatively in this \addedtext{paper}: without an independent persistent homology or Betti number calculation we cannot treat the harmonic energy as direct evidence for a topological cycle.
 
 \paragraph{Operator side: resolvent BW distance.} At each checkpoint we build the symmetric normalised graph Laplacian $L_t$ (adaptive-bandwidth Gaussian kernel, $k$NN${}=15$) on the PCA-reduced probe cloud \citep{coifman2006diffusion} and extract $K = 30$ non-trivial eigenpairs, excluding the constant mode. The resolvent covariance is $\Sigma_t = (L_t + \varepsilon I)^{-1}$ on this retained non-trivial spectrum, with $\varepsilon = 0.01$, which maps small non-trivial Laplacian eigenvalues to large covariance eigenvalues and so emphasises low-frequency structure. We compute the BW distance $d_{\BW}(\Sigma_t, \Sigma_{t+\Delta t})$ between consecutive checkpoints \citep{bhatia2019bures}.
 
@@ -101,11 +103,11 @@ This equals the Wasserstein-2 distance $W_2(\mathcal{N}(0,\Sigma_0), \mathcal{N}
 
 \subsection{Scope and Limitations}
 
-The quantitative analysis within this paper is a three-seed case study, and any other run was used only to check our results; those runs sit outside the main pipeline. We also ran a probe robustness check on the global corroborating diagnostics: effective dimensionality and resolvent BW distance. Across four random 400-example subsets, the dimensional collapse and the BW spiking at the transition point survive.
+The quantitative analysis within this \addedtext{paper} is a three-seed case study, and any other run was used only to check our results; those runs sit outside the main pipeline. \addedtext{We also ran a probe robustness check on the global corroborating diagnostics: effective dimensionality and resolvent BW distance. Across four random 400-example subsets, the dimensional collapse and the BW spiking at the transition point survive.}
 
-The Hodge decomposition operates on the same static set of 500 probe examples. Because resampling probes could affect consistency, uncertainty remains around how stable these results are. A more thorough robustness check using repeated probing was tried, along with varying key settings in the Hodge process of the pipeline. These attempts ran into hard limits on memory capacity before finishing. Incomplete due to resource constraints, those expanded tests appear here without full data coverage.
+The Hodge decomposition \addedtext{operates} on the same static set of 500 probe examples. Because resampling probes could affect consistency, uncertainty remains around how stable these results are. A more thorough robustness check using repeated probing was tried, along with varying key settings in the Hodge process of the pipeline. These attempts ran into hard limits on memory capacity before finishing. Incomplete due to resource constraints, those expanded tests appear here without full data coverage.
 
-The results of this paper should be read as findings from three carefully analysed training runs. Changing the configurations slightly can alter the figures even when trends look stable. Our conclusions therefore remain bound to the setup used and nothing broader.
+The results of this \addedtext{paper} should be read as findings from three carefully analysed training runs. Changing the configurations slightly can alter the figures even when trends look stable. Our conclusions therefore remain bound to the setup used and nothing broader.
 
 Lastly, the Hodge fractions shift with changes to the PCA dimension, along with adjustments to both neighbourhood range and the spectral cutoff used. All results below come from one configuration and three seeds rather than a sweep of a larger seed bank.
 
@@ -152,7 +154,7 @@ We created the following event study to show that the same geometric pattern app
 \label{fig:dg-velocity-quiver-app}
 \end{figure}
 
-\subsection{Global Corroborating Diagnostics}
+\subsection{\addedtext{Global Corroborating Diagnostics}}
 
 \subsubsection{Effective Dimensionality}
 
@@ -177,33 +179,33 @@ The distance time series has three distinct features. The largest peak sits righ
 
 \section{Discussion}
 
-This paper reveals two distinct perspectives on how geometric structure develops. First, the operator-level lens applied to $L^\dagger$. Second, the Hodge approach on the velocity field $v_i(t) = x_i(t + \Delta t) - x_i(t)$. Both sides are available because vertex identities are stable across activation clouds. The operator-side reading reflects changes in the spectrum as geometry evolves, while the movement of individual points across the manifold becomes visible through spatial analysis. As the grokking transition happens, each of these two parts shows large changes at the same time. Across successive markers, the operator distance increases steeply while the velocity field shows that the nature of the velocity Hodge decomposition changes.
+\addedtext{This paper} reveals two distinct perspectives on how geometric structure develops. First, the operator-level lens applied to $L^\dagger$. Second, the Hodge approach on the velocity field $v_i(t) = x_i(t + \Delta t) - x_i(t)$. Both sides are available because vertex identities are stable across activation clouds. The operator-side reading reflects changes in the spectrum as geometry evolves, while the movement of individual points across the manifold becomes visible through spatial analysis. As the grokking transition happens, each of these two parts shows large changes at the same time. Across successive markers, the operator distance increases steeply while the velocity field shows that the nature of the velocity Hodge decomposition changes.
 
 \subsection{Summary of Grokking Findings}
 
-The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). On the operator side, the BW distance between consecutive resolvent covariances has a large initial spike, a secondary increase during the grokking transition, and then a much smaller range of values post-grokking. The effective dimensionality drops from 50.7 to 6.4. After generalisation, the consecutive resolvent BW distances, velocity Hodge, and effective dimensionality converge to stable values. We interpret this to mean that the representation has reached a geometrically stable state.
+The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). On the operator side, the BW distance between consecutive resolvent covariances has a large initial spike, a secondary increase during the grokking transition, and then a much smaller range of values post-grokking. The effective dimensionality drops from 50.7 to 6.4. \addedtext{After generalisation, the consecutive resolvent BW distances, velocity Hodge, and effective dimensionality converge to stable values.} We interpret this to mean that the representation has reached a geometrically stable state.
 
 \subsection{Grokking as Geometric Memory}
 
 The grokking experiment is a concrete case study for geometric memory \citep{noroozizadeh2025geometric}. The three phases of grokking align with three modes of geometric storage.
 
 \begin{enumerate}
-    \item The first phase is pre-algorithmic memorisation (epochs 0--1{,}500). The representation forms a high-dimensional unordered arrangement that fits the training set but does not support generalisation. The BW analysis within this paper registers this as the largest geometric restructuring in the run. The effective dimensionality collapses, and the velocity Hodge decomposition shows coexact-led (curl-like) motion that increases until generalisation begins.
+    \item The first phase is pre-algorithmic memorisation (epochs 0--1{,}500). The representation forms a high-dimensional unordered arrangement that fits the training set but does not support generalisation. The BW analysis within this \addedtext{paper} registers this as the largest geometric restructuring in the run. The effective dimensionality collapses, and the velocity Hodge decomposition shows coexact-led (curl-like) motion that increases until generalisation begins.
 
-    \item The second phase is geometric algorithmisation (epochs 1{,}500--4{,}000). The model shifts from storing individual training examples to storing the actual \emph{algorithm} as a geometric configuration. This is the multi-frequency Fourier arrangement studied in this paper and in \citet{nanda2023progress}. It is supported by the effective dimensionality collapse and the velocity-field Hodge crossover (in the baseline seed).
+    \item The second phase is geometric algorithmisation (epochs 1{,}500--4{,}000). The model shifts from storing individual training examples to storing the actual \emph{algorithm} as a geometric configuration. This is the multi-frequency Fourier arrangement studied in this \addedtext{paper} and in \citet{nanda2023progress}. It is supported by the effective dimensionality collapse and the velocity-field Hodge crossover (in the baseline seed).
 
     \item The third and final phase is geometric refinement (epochs 4{,}000+). The algorithmic geometry has settled, the effective dimensionality plateaus at a low value, the BW distances drop into a low band, and the velocity is exact-dominated in the baseline seed as the network fine-tunes its Fourier embedding rather than reorganising its internal representations through rotation.
 \end{enumerate}
 
-The key insight here is that memorisation and generalisation have distinct geometric signatures. The difference, therefore, is not between geometric and non-geometric storage. It is between what is stored geometrically: individual data points (memorisation) versus an algorithmic structure (generalisation). Grokking is the phase transition between these two modes of memory. The BW framework and Hodge decomposition employed in this paper delineate different aspects of the transition period, and together they illustrate algorithmic reorganisation in a neural network.
+The key insight here is that memorisation and generalisation have distinct geometric signatures. The difference, therefore, is not between geometric and non-geometric storage. It is between what is stored geometrically: individual data points (memorisation) versus an algorithmic structure (generalisation). Grokking is the phase transition between these two modes of memory. \addedtext{The BW framework and Hodge decomposition employed in this paper delineate different aspects of the transition period, and together they illustrate algorithmic reorganisation in a neural network.}
 
 \section{Conclusion}
 
-The primary contribution is a pointwise velocity-field Hodge decomposition across three grokking runs. The transition is clearly visible in the representation and in the operator geometry. The effective dimension of the centred activation covariance collapsed from $50.7$ to $6.4$, while the BW distance between successive resolvent operators showed a large initial spike, a smaller transition-time increase, and then stayed in a small range once the grokking period was over. The Hodge decomposition of the probe velocity field showed a crossover from coexact-guided motion to an exact-dominated field around the grokking period, but the pattern was not clear in one of the three seeds, so wider testing is needed before we can trust this crossover as a diagnostic. What we can say is that in all three seeds the transition was coexact-dominated, with coexact peaking at the start of the transition in two of them, which suggests that the representations undergo rotational shifts as they reorganise. Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
+\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition} across three grokking runs. The transition is clearly visible in the representation and in the operator geometry. The effective dimension of the centred activation covariance collapsed from $50.7$ to $6.4$, while the BW distance between successive resolvent operators showed a large initial spike, a smaller transition-time increase, and then stayed in a small range once the grokking period was over. The Hodge decomposition of the probe velocity field showed a crossover from coexact-guided motion to an exact-dominated field around the grokking period, but the pattern was not clear in one of the three seeds, so wider testing is needed before we can trust this crossover as a diagnostic. What we can say is that in all three seeds the transition was coexact-dominated, with coexact peaking at the start of the transition in two of them, which suggests that the representations undergo rotational shifts as they reorganise. Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
 
 \appendix
 
-\section{Supplementary Geometric Diagnostics}
+\section{\addedtext{Supplementary Geometric Diagnostics}}
 
 \subsection{Fourier-Supervised Projection}
 \label{sec:grokking-pca}
@@ -228,7 +230,7 @@ The raw PCA diagnostic and the unsupervised DG scan below identify $k_{\mathrm{d
 \label{fig:grokking-pca}
 \end{figure}
 
-\subsection{Heat Kernel Multiscale Analysis}
+\subsection{\addedtext{Heat Kernel Multiscale Analysis}}
 
 The complementary operator-level view replaces the resolvent covariance with the heat kernel
 \[
