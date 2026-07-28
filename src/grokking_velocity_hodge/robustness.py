@@ -17,6 +17,13 @@ def _tuple_env(name: str, default: tuple[int, ...]) -> tuple[int, ...]:
     return default if not value else tuple(int(item.strip()) for item in value.split(",") if item.strip())
 
 
+def _bool_env(name: str, default: bool) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() not in {"0", "false", "no", "off"}
+
+
 @dataclass(frozen=True)
 class HodgeSweepConfig:
     pca_dims: tuple[int, ...] = (5, 10, 20)
@@ -25,6 +32,7 @@ class HodgeSweepConfig:
     subset_size: int = 400
     subset_seeds: tuple[int, ...] = (1101, 2202, 3303, 4404)
     pairs_per_phase: int = 3
+    include_permutation_null: bool = True
 
     @classmethod
     def from_environment(cls) -> "HodgeSweepConfig":
@@ -35,6 +43,10 @@ class HodgeSweepConfig:
             subset_size=int(os.environ.get("GROKKING_HODGE_SWEEP_SUBSET_SIZE", cls.subset_size)),
             subset_seeds=_tuple_env("GROKKING_HODGE_SWEEP_SUBSET_SEEDS", cls.subset_seeds),
             pairs_per_phase=int(os.environ.get("GROKKING_HODGE_SWEEP_PAIRS_PER_PHASE", cls.pairs_per_phase)),
+            include_permutation_null=_bool_env(
+                "GROKKING_HODGE_SWEEP_PERMUTATION_NULL",
+                cls.include_permutation_null,
+            ),
         )
 
 
@@ -157,7 +169,7 @@ def run_hodge_robustness(
                     | {"subset_seed": subset_seed, "permuted_correspondence": False}
                 )
 
-                if setting == baseline:
+                if sweep.include_permutation_null and setting == baseline:
                     permutation = rng.permutation(len(destination))
                     null = hodge_decompose_velocity(
                         source,

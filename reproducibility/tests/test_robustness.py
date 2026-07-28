@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from grokking_velocity_hodge.config import ExperimentConfig
 from grokking_velocity_hodge.robustness import (
@@ -9,6 +10,13 @@ from grokking_velocity_hodge.robustness import (
 
 
 class RobustnessConfigurationTests(unittest.TestCase):
+    def test_permutation_null_can_be_disabled_from_environment(self):
+        with patch.dict(
+            "os.environ",
+            {"GROKKING_HODGE_SWEEP_PERMUTATION_NULL": "false"},
+        ):
+            self.assertFalse(HodgeSweepConfig.from_environment().include_permutation_null)
+
     def test_one_at_a_time_grid_contains_baseline_without_full_factorial(self):
         experiment = ExperimentConfig()
         sweep = HodgeSweepConfig()
