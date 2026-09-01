@@ -100,6 +100,8 @@ def analysis_parameters(
         "THESIS_WORKSPACE_ROOT": workspace_root,
         "THESIS_DATA_ROOT": str(run["output_root"]),
         "GROKKING_ACTIVATION_DIR": str(run["activation_dir"]),
+        "GROKKING_DATA_SEED": str(run["data_seed"]),
+        "GROKKING_PROBE_SEED": str(run["probe_seed"]),
         "GROKKING_CHART_VARIANT": f"{chart_variant_prefix}_{run['data_seed']}",
         "TASKS": ",".join(task_keys),
         "VERIFY_OUTPUTS": str(verify_outputs).lower(),

@@ -46,3 +46,10 @@ figures/grokking*/
 
 Thumbs.db
 .DS_Store
+
+# Private local planning notes
+/PRIVATE_CAREER_PLAN.md
+
+# Private local documents and source audits
+/VERBATIM_AUDIT.md
+/Tomas_Flood_CV*.pdf

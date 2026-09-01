@@ -1,0 +1,41 @@
+{
+  "config": {
+    "grid_size": 5,
+    "annulus_rings": 3,
+    "annulus_angles": 24,
+    "knn": 8,
+    "grid_basis": 20,
+    "annulus_basis": 30
+  },
+  "thresholds": {
+    "exact": 0.85,
+    "coexact": 0.85,
+    "harmonic": 0.8
+  },
+  "fields": {
+    "gradient": {
+      "exact": 0.9324284844814675,
+      "coexact": 0.0006660197756233514,
+      "harmonic": 0.06690549574290912,
+      "total_energy": 0.3338941544312601
+    },
+    "rotation": {
+      "exact": 0.005115257208272373,
+      "coexact": 0.9880958086270053,
+      "harmonic": 0.0067889341647223555,
+      "total_energy": 0.6329904389272452
+    },
+    "harmonic": {
+      "exact": 0.02791955005576765,
+      "coexact": 0.030359131104722298,
+      "harmonic": 0.94172131883951,
+      "total_energy": 0.8654593525354464
+    }
+  },
+  "checks": {
+    "gradient_is_exact": true,
+    "rotation_is_coexact": true,
+    "discrete_harmonic_is_harmonic": true
+  },
+  "passed": true
+}

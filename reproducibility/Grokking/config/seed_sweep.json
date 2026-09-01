@@ -8,7 +8,8 @@
     "velocity_hodge",
     "effdim_pca",
     "resolvent_bw",
-    "heat_kernel"
+    "heat_kernel",
+    "hodge_robustness"
   ],
   "chart_variant_prefix": "seed_sweep",
   "training_defaults": {
@@ -29,7 +30,7 @@
       "root": "{canonical_data}",
       "activation_dir": "{canonical_data}/results/grokking_acts_v6",
       "output_root": "{seed_sweep}/grokking_seed598",
-      "train_if_missing": false,
+      "train_if_missing": true,
       "tmp_dir": "{seed_sweep}/tmp/seed598"
     },
     {
@@ -55,6 +56,66 @@
       "output_root": "{seed_sweep}/grokking_seed777",
       "train_if_missing": true,
       "tmp_dir": "{seed_sweep}/tmp/seed777"
+    },
+    {
+      "key": "seed1001_probe43",
+      "label": "Seed 1001",
+      "canonical": false,
+      "data_seed": 1001,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed1001",
+      "activation_dir": "{seed_sweep}/grokking_seed1001/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed1001",
+      "train_if_missing": true,
+      "tmp_dir": "{seed_sweep}/tmp/seed1001"
+    },
+    {
+      "key": "seed2027_probe43",
+      "label": "Seed 2027",
+      "canonical": false,
+      "data_seed": 2027,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed2027",
+      "activation_dir": "{seed_sweep}/grokking_seed2027/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed2027",
+      "train_if_missing": true,
+      "tmp_dir": "{seed_sweep}/tmp/seed2027"
+    },
+    {
+      "key": "seed3141_probe43",
+      "label": "Seed 3141",
+      "canonical": false,
+      "data_seed": 3141,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed3141",
+      "activation_dir": "{seed_sweep}/grokking_seed3141/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed3141",
+      "train_if_missing": true,
+      "tmp_dir": "{seed_sweep}/tmp/seed3141"
+    },
+    {
+      "key": "seed4096_probe43",
+      "label": "Seed 4096",
+      "canonical": false,
+      "data_seed": 4096,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed4096",
+      "activation_dir": "{seed_sweep}/grokking_seed4096/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed4096",
+      "train_if_missing": true,
+      "tmp_dir": "{seed_sweep}/tmp/seed4096"
+    },
+    {
+      "key": "seed8080_probe43",
+      "label": "Seed 8080",
+      "canonical": false,
+      "data_seed": 8080,
+      "probe_seed": 43,
+      "root": "{seed_sweep}/grokking_seed8080",
+      "activation_dir": "{seed_sweep}/grokking_seed8080/results/grokking_acts_v6",
+      "output_root": "{seed_sweep}/grokking_seed8080",
+      "train_if_missing": true,
+      "tmp_dir": "{seed_sweep}/tmp/seed8080"
     }
   ]
 }

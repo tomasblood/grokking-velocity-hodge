@@ -10,6 +10,10 @@ from grokking_velocity_hodge.pipeline import (
     widget_or_default,
     workspace_root,
 )
+from grokking_velocity_hodge.reporting import (
+    build_cross_seed_hodge_summary,
+    write_cross_seed_hodge_outputs,
+)
 from grokking_velocity_hodge.seed_sweep import (
     activation_status,
     aggregate_seed_summaries,
@@ -111,9 +115,9 @@ def main() -> None:
             print("Training would run because activations are incomplete.")
             continue
 
-        assert RUN_TRAINING, f"Activation set is incomplete and RUN_TRAINING=false: {status['missing'][:5]}"
-
-        assert not run.get("canonical", False), "Canonical activations are missing"
+        assert RUN_TRAINING and run.get("train_if_missing", True), (
+            f"Activation set is incomplete and training is disabled: {status['missing'][:5]}"
+        )
 
         assert not (status["existing_activation_count"] and not run.get("force_retrain", False)), (
             f"{run['activation_dir']} contains a partial activation set"
@@ -153,6 +157,30 @@ def main() -> None:
         print("Seed-sweep summary files:")
         for kind, path in written.items():
             print(f"{kind}: {path}")
+
+        hodge_inputs = [
+            {
+                "training_seed": int(run["data_seed"]),
+                "hodge_path": Path(run["output_root"])
+                / "results"
+                / "grokking_hodge_robustness"
+                / "hodge_robustness.json",
+                "training_path": Path(run["activation_dir"]) / "training.json",
+            }
+            for run in runs
+        ]
+        if len(hodge_inputs) == 8:
+            hodge_summary = build_cross_seed_hodge_summary(hodge_inputs)
+            hodge_written = write_cross_seed_hodge_outputs(
+                hodge_summary,
+                Path(CONFIG["summary_dir"]) / "hodge_cross_seed",
+                Path(WORKSPACE_ROOT) / "generated",
+            )
+            print("Cross-seed Hodge outputs:")
+            for kind, path in hodge_written.items():
+                print(f"{kind}: {path}")
+        else:
+            print("Cross-seed Hodge report skipped: the selected run set is not all eight seeds.")
 
     print("=" * 88)
     print("Grokking seed sweep complete.")

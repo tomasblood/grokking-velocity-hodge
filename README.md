@@ -28,16 +28,24 @@ latexmk -pdf paper.tex
 ## Reproduce the experiments
 
 See [`reproducibility/README.md`](reproducibility/README.md) for configuration,
-training, and analysis instructions.
+training, analysis, and exact output instructions. The eight-seed Hodge result
+can be regenerated immediately from the tracked saved results with:
+
+```powershell
+python reproducibility/Grokking/Analysis/12_hodge_cross_seed_summary.py
+```
 
 The reusable analysis code is installed from `src/grokking_velocity_hodge`;
 the scripts do not depend on notebook-only path injection.
 
 ## Current status
 
-The draft is venue-neutral. Before submission it still needs the target venue's
-document class, author metadata, any required data/code availability statement,
-and the completed empirical Hodge robustness sweep identified in the thesis.
+The eight-seed empirical Hodge robustness sweep is complete, its saved results
+and training metadata are tracked under
+`reproducibility/artifacts/eight_seed_hodge`, and the manuscript tables are
+generated from those files. The draft remains venue-neutral; submission still
+requires the target venue's document class, author metadata, and any venue-specific
+data/code availability statement.
 
 ## Provenance
 

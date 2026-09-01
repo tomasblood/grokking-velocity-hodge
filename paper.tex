@@ -19,6 +19,9 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\BW}{\mathrm{BW}}
 \newcommand{\addedtext}[1]{\textcolor{blue}{#1}}
+\input{generated/eight_seed_hodge_macros.tex}
+\input{generated/eight_seed_hodge_baseline_rows.tex}
+\input{generated/eight_seed_hodge_phase_sensitivity_rows.tex}
 \pdfstringdefDisableCommands{\def\addedtext#1{#1}}
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
@@ -32,7 +35,7 @@
 \maketitle
 
 \begin{abstract}
-Grokking refers to the phenomenon of neural networks hitting near-perfect training accuracy early and then taking orders of magnitude more steps to generalise on a held-out dataset \citep{power2022grokking}. \addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition} across three grokking runs. The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). Across three seeds the coexact fraction in this window is 0.48--0.56, peaking at the start of the transition in two of them. \addedtext{Effective dimensionality and resolvent BW distance provide global corroborating diagnostics.} Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
+Grokking refers to the phenomenon of neural networks hitting near-perfect training accuracy early and then taking orders of magnitude more steps to generalise on a held-out dataset \citep{power2022grokking}. \addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition across eight grokking runs. Across eight training seeds, the baseline mean exact, coexact, and harmonic fractions change from $(\HodgeFixedTransitionExact,\HodgeFixedTransitionCoexact,\HodgeFixedTransitionHarmonic)$ during the fixed transition window to $(\HodgeFixedPostExact,\HodgeFixedPostCoexact,\HodgeFixedPostHarmonic)$ post-grokking. At the baseline setting, the post-minus-transition change in coexact-minus-exact fraction is $\HodgeFixedChange$ (95\% seed-level $t$ interval $[\HodgeFixedChangeLow,\HodgeFixedChangeHigh]$). Its direction is the same in all \HodgeSensitivityComparisons{} correlated seed-by-setting sensitivity comparisons and survives seed-relative phase alignment ($\HodgeEventChange$, 95\% interval $[\HodgeEventChangeLow,\HodgeEventChangeHigh]$). Permuting point correspondence removes the post-grokking exact enrichment. Effective dimensionality and resolvent BW distance provide global corroborating diagnostics. The robust result is therefore a post-grokking shift toward exact velocity, rather than a universal coexact signature during the transition itself.}
 \end{abstract}
 
 \section{Introduction}
@@ -46,7 +49,7 @@ The network first memorises the training set as a lookup table, then gradually f
 \end{equation}
 This clock algorithm needs only a small number of Fourier frequencies. It places the $P$ residue classes on a low-dimensional manifold with the topology of a circle for one frequency or a torus for several.
 
-\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition across three grokking runs. The transition is clearly visible in the representation and in the global corroborating diagnostics. Supplementary geometric diagnostics and an audit of the evidential status of these claims appear in the appendix.}
+\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition across eight grokking runs. The transition is clearly visible in the representation and in the global corroborating diagnostics, while the completed seed, probe, parameter, synthetic-field, and correspondence-null checks delimit the Hodge claim. Supplementary geometric diagnostics and an audit of the evidential status of these claims appear in the appendix.}
 
 \addedtext{In this paper we study the grokking transition through a primary spatial analysis and complementary global diagnostics.} Both are built on a shared representation space made from activation checkpoints.
 
@@ -71,7 +74,7 @@ We use a deliberately simplified single-head variant of the \citet{nanda2023prog
     \item Optimiser: AdamW with $\beta = (0.9, 0.98)$, weight decay $1.0$.
     \item Training: 25{,}000 epochs, full-batch.
     \item Data split: 70\% of all $(a, b)$ pairs held out for validation.
-    \item Reproducibility: \texttt{torch.manual\_seed(598)} before model creation; no separate model seed. Pinned to TransformerLens~2.17.0. In the runs checked, this setup reproduces across TL versions 2.9.0--2.17.0.
+    \item \addedtext{Reproducibility: for each of eight runs, the data seed is also supplied to \texttt{torch.manual\_seed} before model creation; there is no separate model seed. The runs use seeds 598, 599, 777, 1001, 2027, 3141, 4096, and 8080, and are pinned to TransformerLens~2.17.0.}
 \end{itemize}
 
 We intentionally did not aim for an exact reproduction of the four-head model in \citet{nanda2023progress}. We reduced to a single head because the four-head version gave a noisier representation. In that version the circular correlation of the recovered coordinates falls from $\approx 0.85$ to $\approx 0.44$, which makes the Fourier analysis we run later quite difficult. Indeed, the 1-head variant shows the same memorisation, transition and generalisation pattern that we want to analyse, and we found the Fourier geometry easier to read.
@@ -90,6 +93,8 @@ We reduce $X_t$ to 10 dimensions with PCA. We also project $v_i$ through the sam
 \]
 where $\mathrm{d} f$ is exact (the gradient of a 0-form), $\delta g$ is coexact (the codifferential of a 2-form), and $h$ is harmonic. The three components are orthogonal on a smooth manifold. On a finite point cloud the numerical cross terms are small but non-zero. The raw magnitude charts are very noisy, so to interpret them we look at the composition rather than the raw magnitudes. We report normalised energy fractions $(\hat{e}_{\mathrm{exact}}, \hat{e}_{\mathrm{coexact}}, \hat{e}_{\mathrm{harmonic}})$ that sum to one by construction, telling us how much of the probes' motion is gradient-like, coexact-like, or left in the residual harmonic component. We read the harmonic term conservatively in this \addedtext{paper}: without an independent persistent homology or Betti number calculation we cannot treat the harmonic energy as direct evidence for a topological cycle.
 
+\addedtext{For the robustness analysis we use eight independently trained seeds, four random 400-example probe subsets, and the same nine preselected checkpoint pairs. Starting from the baseline setting of PCA dimension 10, $k$NN${}=15$, and 50 basis functions, we vary one setting at a time over PCA dimensions 5 and 20, $k$NN values 10 and 20, and 30 and 75 basis functions. This gives seven settings and 56 correlated seed-by-setting sensitivity comparisons; the eight training seeds, rather than those 56 comparisons, are the independent units for inference. The primary fixed convention labels pair midpoints before 1{,}500 as pre-grokking, 1{,}500--4{,}000 inclusive as transition, and later midpoints as post-grokking. As a phase-definition sensitivity check, we anchor each seed at its first saved checkpoint with validation accuracy at least 0.5, define its transition as $[-1{,}500,+1{,}000]$ epochs around that event, and reclassify the same nine pairs (yielding two to five pairs per phase, depending on seed). At the baseline parameter setting, we draw one separate destination-point permutation for each seed, probe subset, and checkpoint pair: $8\times4\times9=288$ permutations. Actual and null fractions are paired within the same training seed, probe subset, and checkpoint pair, averaged within seed, and then analysed across the eight seeds. All reported 95\% intervals are two-sided Student $t$ intervals over eight seed-level means ($7$ degrees of freedom). Finally, we calibrate the implementation on synthetic gradient, rotational, and discrete harmonic fields.}
+
 \paragraph{Operator side: resolvent BW distance.} At each checkpoint we build the symmetric normalised graph Laplacian $L_t$ (adaptive-bandwidth Gaussian kernel, $k$NN${}=15$) on the PCA-reduced probe cloud \citep{coifman2006diffusion} and extract $K = 30$ non-trivial eigenpairs, excluding the constant mode. The resolvent covariance is $\Sigma_t = (L_t + \varepsilon I)^{-1}$ on this retained non-trivial spectrum, with $\varepsilon = 0.01$, which maps small non-trivial Laplacian eigenvalues to large covariance eigenvalues and so emphasises low-frequency structure. We compute the BW distance $d_{\BW}(\Sigma_t, \Sigma_{t+\Delta t})$ between consecutive checkpoints \citep{bhatia2019bures}.
 
 Given two geometric states as Gaussians $\mathcal{N}(0, \Sigma_0)$ and $\mathcal{N}(0, \Sigma_1)$ where $\Sigma_t = f(L_t)$, the Bures--Wasserstein distance \citep{bhatia2019bures} is:
@@ -103,13 +108,9 @@ This equals the Wasserstein-2 distance $W_2(\mathcal{N}(0,\Sigma_0), \mathcal{N}
 
 \subsection{Scope and Limitations}
 
-The quantitative analysis within this \addedtext{paper} is a three-seed case study, and any other run was used only to check our results; those runs sit outside the main pipeline. \addedtext{We also ran a probe robustness check on the global corroborating diagnostics: effective dimensionality and resolvent BW distance. Across four random 400-example subsets, the dimensional collapse and the BW spiking at the transition point survive.}
+\addedtext{The quantitative Hodge analysis within this paper uses eight independently trained seeds. We also ran probe robustness checks on the Hodge fractions and on the global corroborating diagnostics. Across four random 400-example subsets, the Hodge phase shift, dimensional collapse, and BW spiking at the transition point survive.}
 
-The Hodge decomposition \addedtext{operates} on the same static set of 500 probe examples. Because resampling probes could affect consistency, uncertainty remains around how stable these results are. A more thorough robustness check using repeated probing was tried, along with varying key settings in the Hodge process of the pipeline. These attempts ran into hard limits on memory capacity before finishing. Incomplete due to resource constraints, those expanded tests appear here without full data coverage.
-
-The results of this \addedtext{paper} should be read as findings from three carefully analysed training runs. Changing the configurations slightly can alter the figures even when trends look stable. Our conclusions therefore remain bound to the setup used and nothing broader.
-
-Lastly, the Hodge fractions shift with changes to the PCA dimension, along with adjustments to both neighbourhood range and the spectral cutoff used. All results below come from one configuration and three seeds rather than a sweep of a larger seed bank.
+\addedtext{The Hodge fractions remain sensitive to PCA dimension, neighbourhood range, and spectral cutoff. The completed one-at-a-time sweep supports the direction of the post-grokking shift, but not universal coexact dominance during the transition or universal exact dominance after it. The eight runs reach 99\% validation accuracy between epochs 3{,}500 and 5{,}500; the directional result survives both the fixed and seed-relative phase definitions, although neither exhausts reasonable phase conventions. The conclusions therefore remain bound to this architecture, task, and finite parameter grid.}
 
 \section{Results}
 
@@ -119,12 +120,12 @@ A few hundred rounds into training the model hits perfect training accuracy. Yet
 
 Later analyses tie back to this timeline as their foundation. Training divides into three segments: \emph{memorisation} occurs between epochs 0 and 1{,}500. The shift known as \emph{grokking} unfolds from epoch 1{,}500 onward, lasting until around epoch 4{,}000. Beyond that point performance settles, which marks the \emph{post-grokking} period. Large shifts in validation accuracy, along with changes in how representations are structured, define what we call a phase transition; we use ``phase transition'' descriptively, as an analogy of a thermodynamic phase transition.
 
-We created the following event study to show that the same geometric pattern appears at the transition in all three seeds. To compare the runs in the same chart, we indexed each run by the first checkpoint at which it reached a validation accuracy of 0.5. The result in \Cref{fig:grokking-event-study} shows that the dimensional collapse, validation accuracy transition, BW distances and coexact-led Hodge decomposition are all present at the generalisation transition across the three seeds.
+\addedtext{We created the following event study for the original three seeds to show that the same geometric pattern appears at the transition.} To compare the runs in the same chart, we indexed each run by the first checkpoint at which it reached a validation accuracy of 0.5. The result in \Cref{fig:grokking-event-study} shows that the dimensional collapse, validation accuracy transition, BW distances and coexact-led Hodge decomposition are all present at the generalisation transition across the three seeds.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_grokking_event_study.pdf}
-\caption{Three-seed event study aligned by the first checkpoint where validation accuracy reaches 0.5. Panel A shows validation accuracy. Panel B shows effective dimension. Panel C shows consecutive resolvent BW distance. Panel D shows consecutive heat-kernel BW distance at $\tau=1$. Panel E shows the Hodge coexact fraction.}
+\caption{\addedtext{Original three-seed event study} aligned by the first checkpoint where validation accuracy reaches 0.5. Panel A shows validation accuracy. Panel B shows effective dimension. Panel C shows consecutive resolvent BW distance. Panel D shows consecutive heat-kernel BW distance at $\tau=1$. Panel E shows the Hodge coexact fraction.}
 \label{fig:grokking-event-study}
 \end{figure}
 
@@ -135,9 +136,9 @@ We created the following event study to show that the same geometric pattern app
 \begin{enumerate}
     \item Memorisation phase (epochs 0--1{,}500): the velocity is coexact-dominated on average (mean $\sim$49\% coexact, $\sim$32\% exact, $\sim$19\% harmonic). Step 1{,}000$\to$1{,}500 shows the strongest coexact fraction ($\sim$72\%). This indicates curl-dominated rearrangement of the point cloud during memorisation. The initial step 0$\to$500 still behaves differently, with elevated harmonic energy ($\sim$36\%); this likely reflects large-scale compression from random initialisation and residual global structure in the harmonic component rather than direct topological evidence.
 
-    \item Grokking transition (epochs 1{,}500--4{,}000): the exact component rises within the window as the Fourier structure emerges, but the phase remains coexact-leading on average ($\sim$33\% exact, $\sim$54\% coexact, $\sim$13\% harmonic). The transition is therefore a gradual rise of exact motion within a still-curl-dominated regime, with the actual flip happening only post-grokking in the baseline seed. Across three seeds the coexact fraction in this window is 0.48--0.56, peaking at the start of the transition in two of them.
+    \item Grokking transition (epochs 1{,}500--4{,}000): the exact component rises within the window as the Fourier structure emerges, but the phase remains coexact-leading on average ($\sim$33\% exact, $\sim$54\% coexact, $\sim$13\% harmonic). The transition is therefore a gradual rise of exact motion within a still-curl-dominated regime, with the actual flip happening only post-grokking in the baseline seed. \addedtext{Across eight seeds at the baseline setting, the transition means are 0.325 exact, 0.450 coexact, and 0.225 harmonic. Coexact exceeds exact on average, but transition coexact dominance is not invariant to seed or parameter choice.}
 
-    \item Post-grokking (epochs 4{,}000+): the exact component leads on average (mean $\sim$69\% exact, $\sim$21\% coexact, $\sim$10\% harmonic). The representation continues to undergo directed refinement, while the harmonic term remains a residual global component of the finite DG decomposition rather than direct evidence for a topological cycle. Note that across three seeds the composition varies (post-grokking exact fraction 0.24--0.69).
+    \item Post-grokking (epochs 4{,}000+): the exact component leads on average (mean $\sim$69\% exact, $\sim$21\% coexact, $\sim$10\% harmonic). The representation continues to undergo directed refinement, while the harmonic term remains a residual global component of the finite DG decomposition rather than direct evidence for a topological cycle. \addedtext{Across eight seeds at the baseline setting, the post-grokking means are 0.473 exact, 0.331 coexact, and 0.196 harmonic. Exact exceeds coexact in six of eight baseline runs and in 44 of 56 seed-by-setting comparisons; the invariant result is the shift toward exact, not absolute exact dominance.}
 \end{enumerate}
 
 \begin{figure}[htbp]
@@ -153,6 +154,44 @@ We created the following event study to show that the same geometric pattern app
 \caption{Decomposed velocity fields during grokking. Columns: pre-grokking (1{,}500--2{,}000), transition (2{,}500--3{,}000), and post-grokking (4{,}000--4{,}500). Rows: total velocity, exact (gradient), coexact (curl), and harmonic. Energy fractions are annotated.}
 \label{fig:dg-velocity-quiver-app}
 \end{figure}
+
+\FloatBarrier
+
+\subsubsection{\addedtext{Eight-Seed Robustness and Correspondence Null}}
+
+\addedtext{Table~\ref{tab:eight-seed-hodge} summarises the baseline Hodge composition using training seeds as the independent units.}
+
+\begin{table}[htbp]
+\centering
+\caption{\addedtext{Baseline Hodge energy fractions across eight training seeds. Values are means of the seed-level phase means.}}
+\label{tab:eight-seed-hodge}
+\begin{tabular}{lccc}
+\toprule
+\addedtext{Phase} & \addedtext{Exact} & \addedtext{Coexact} & \addedtext{Harmonic} \\
+\midrule
+\HodgeBaselineRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\addedtext{The reported $\HodgeFixedChange$ estimate is the baseline-setting contrast, not a pool over parameter settings. Within each seed we first average over its four probe subsets and selected checkpoint pairs, calculate $(\mathrm{coexact}-\mathrm{exact})_{\mathrm{post}}-(\mathrm{coexact}-\mathrm{exact})_{\mathrm{transition}}$, and then average the resulting eight seed contrasts. Its two-sided seed-level $t$ interval is $[\HodgeFixedChangeLow,\HodgeFixedChangeHigh]$. All \HodgeFixedNegativeComparisons/\HodgeSensitivityComparisons{} correlated fixed-window seed-by-setting changes are negative. After seed-relative phase alignment the baseline estimate is $\HodgeEventChange$ ($[\HodgeEventChangeLow,\HodgeEventChangeHigh]$), and all \HodgeEventNegativeComparisons/\HodgeSensitivityComparisons{} sensitivity changes remain negative. Absolute post-grokking exact dominance occurs in \HodgeFixedPostExactComparisons/\HodgeSensitivityComparisons{} fixed-window comparisons and \HodgeEventPostExactComparisons/\HodgeSensitivityComparisons{} seed-relative comparisons.}
+
+\begin{table}[htbp]
+\centering
+\caption{\addedtext{Phase-definition sensitivity of the baseline contrast. The estimate and 95\% interval use eight seed-level values; the two rightmost columns are descriptive counts of correlated sensitivity comparisons.}}
+\label{tab:hodge-phase-sensitivity}
+\begin{tabular}{lcccc}
+\toprule
+\addedtext{Phase definition} & \addedtext{Mean change} & \addedtext{95\% seed-level $t$ interval} & \addedtext{Negative} & \addedtext{Post exact-leading} \\
+\midrule
+\HodgePhaseSensitivityRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\addedtext{The correspondence null is based on 288 separately drawn permutations, one for each training-seed--probe-subset--checkpoint-pair baseline record. Each actual field is paired with its null at the same seed, subset, and checkpoint pair before within-seed averaging. Post-grokking, the actual-minus-null exact fraction is $\HodgePostNullExact$ (95\% seed-level $t$ interval $[\HodgePostNullExactLow,\HodgePostNullExactHigh]$), while the coexact difference is $\HodgePostNullCoexact$ ($[\HodgePostNullCoexactLow,\HodgePostNullCoexactHigh]$).}
+
+\addedtext{The synthetic calibration assigns 93.2\% of a gradient field to the exact component, 98.8\% of a rotational field to the coexact component, and 94.2\% of a discrete harmonic field to the harmonic component. Across the empirical sweep, the median between-subset standard deviations are 0.015 exact, 0.020 coexact, and 0.015 harmonic.}
 
 \subsection{\addedtext{Global Corroborating Diagnostics}}
 
@@ -185,6 +224,8 @@ The distance time series has three distinct features. The largest peak sits righ
 
 The spatial analysis showed that, in the baseline seed, the probe velocity evolves from a coexact-dominated (curl-like, $\sim$49\%) regime during memorisation to an exact-dominated (directed, $\sim$69\%) post-grokking regime, with the exact component rising during the transition window (epochs 1{,}500 to 4{,}000). On the operator side, the BW distance between consecutive resolvent covariances has a large initial spike, a secondary increase during the grokking transition, and then a much smaller range of values post-grokking. The effective dimensionality drops from 50.7 to 6.4. \addedtext{After generalisation, the consecutive resolvent BW distances, velocity Hodge, and effective dimensionality converge to stable values.} We interpret this to mean that the representation has reached a geometrically stable state.
 
+\addedtext{The eight-seed analysis narrows the Hodge interpretation. The transition-to-post change moves toward exact velocity in every seed and every tested parameter setting under both fixed and event-aligned phase definitions, while the absolute ordering of exact and coexact fractions varies. Statistical inference treats the eight training seeds as independent; the 56 within-seed setting comparisons are descriptive sensitivity checks. The correspondence null shows that the post-grokking exact enrichment depends on preserving point identity across checkpoints.}
+
 \subsection{Grokking as Geometric Memory}
 
 The grokking experiment is a concrete case study for geometric memory \citep{noroozizadeh2025geometric}. The three phases of grokking align with three modes of geometric storage.
@@ -201,7 +242,7 @@ The key insight here is that memorisation and generalisation have distinct geome
 
 \section{Conclusion}
 
-\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition} across three grokking runs. The transition is clearly visible in the representation and in the operator geometry. The effective dimension of the centred activation covariance collapsed from $50.7$ to $6.4$, while the BW distance between successive resolvent operators showed a large initial spike, a smaller transition-time increase, and then stayed in a small range once the grokking period was over. The Hodge decomposition of the probe velocity field showed a crossover from coexact-guided motion to an exact-dominated field around the grokking period, but the pattern was not clear in one of the three seeds, so wider testing is needed before we can trust this crossover as a diagnostic. What we can say is that in all three seeds the transition was coexact-dominated, with coexact peaking at the start of the transition in two of them, which suggests that the representations undergo rotational shifts as they reorganise. Further, a stronger mechanistic claim would also require the Hodge decomposition to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
+\addedtext{The primary contribution is a pointwise velocity-field Hodge decomposition across eight grokking runs. The effective dimension of the centred activation covariance collapses from 50.7 to 6.4 in the baseline run, while the BW distance between successive resolvent operators shows a large initial spike, a smaller transition-time increase, and then remains in a smaller range once grokking is over. The completed Hodge sweep shows a transition-to-post shift toward exact velocity in all eight seeds and all \HodgeSensitivityComparisons{} correlated seed-by-setting sensitivity comparisons. At the baseline setting, the seed-level mean change in coexact-minus-exact is $\HodgeFixedChange$, and the correspondence null removes the post-grokking exact enrichment. Since absolute exact dominance occurs in \HodgeFixedPostExactComparisons/\HodgeSensitivityComparisons{} fixed-window comparisons, the supported conclusion is directional: generalisation is followed by movement toward a more exact velocity field, not by a universal component ordering in every run.}
 
 \appendix
 
@@ -268,12 +309,12 @@ Indeed the global peak is roughly one-third the local peak. Another small peak s
 Grokking has a sharp training transition &
 Validation accuracy remains near chance until $\sim$1{,}500 epochs, reaches 94.3\% by 3{,}000, and reaches 100\% by 4{,}000. &
 All geometric summaries are anchored to the same pre/transition/post timeline. &
-Three trained seeds (598, 599, 777). \\
+\addedtext{Eight trained seeds; 99\% validation accuracy occurs between epochs 3{,}500 and 5{,}500.} \\
 \addlinespace[0.2em]
-Point motion changes character &
-Velocity Hodge is coexact-led during memorisation and the transition window. &
-Consistent with the BW/heat/operator timing and the post-grokking stabilisation. Three seeds: coexact fraction 0.49--0.58 in the transition window. &
-No completed Hodge sweep. \\
+\addedtext{Point motion shifts toward exact velocity after grokking} &
+\addedtext{At the baseline setting, mean coexact-minus-exact changes by $\HodgeFixedChange$ from transition to post-grokking.} &
+\addedtext{Eight independent seeds; four probe subsets; seven settings; \HodgeFixedNegativeComparisons/\HodgeSensitivityComparisons{} correlated directional sensitivity comparisons; seed-relative alignment; synthetic calibration; and a 288-permutation paired null.} &
+\addedtext{Absolute post-grokking exact dominance occurs in \HodgeFixedPostExactComparisons/\HodgeSensitivityComparisons{} fixed-window comparisons; finite phase definitions and parameter grid.} \\
 \addlinespace[0.2em]
 Representation dimension collapses &
 Participation-ratio effective dimension falls from 50.7 at initialisation to 6.4 post-grokking. &
@@ -299,7 +340,7 @@ In-sample ridge; best-pair circular scan; correlation varies in seeds 599 and 77
 \renewcommand{\arraystretch}{1.0}
 \end{table}
 
-\Cref{tab:grokking-claims-evidence} also identifies what would weaken our interpretation. The analysis on the operator side held under three independent training seeds for the dimensionality collapse and the BW spikes during the grokking transition. However, it could still lose its persuasiveness if those effects disappeared under held-out probe resampling. Further, a stronger mechanistic claim would also require the Hodge decomposition and circular coordinate diagnostics to survive parameter and probe sweeps, which we were not able to complete due to resource constraints.
+\Cref{tab:grokking-claims-evidence} also identifies what would weaken our interpretation. The analysis on the operator side held under three independent training seeds for the dimensionality collapse and the BW spikes during the grokking transition. However, it could still lose its persuasiveness if those effects disappeared under held-out probe resampling. \addedtext{The Hodge decomposition now survives the completed eight-seed, probe, and one-at-a-time parameter sweeps in its directional claim. The circular-coordinate diagnostics remain supplementary and do not receive the same robustness claim.}
 
 \bibliographystyle{plainnat}
 \bibliography{references}

@@ -23,3 +23,21 @@ python reproducibility/Grokking/Validation/02_verify_bw_provenance.py `
   --rerun path/to/resolvent_bw_results.json `
   --output path/to/provenance_report.json
 ```
+
+## Eight-seed Hodge evidence
+
+The completed per-seed Hodge records and corresponding training histories are
+stored in `reproducibility/artifacts/eight_seed_hodge`. Their source execution
+metadata are embedded in each JSON file, and their SHA-256 digests are recorded
+in `remote_artifact_manifest_8seed.json`. Regenerate the cross-seed statistics,
+CSV audit tables, LaTeX inputs, and a new output manifest with:
+
+```powershell
+python reproducibility/Grokking/Analysis/12_hodge_cross_seed_summary.py
+```
+
+The report validates the bundled files against this manifest, then validates
+record uniqueness, finiteness, and component sums before calculating results.
+The permutation null contains 288 paired records: one
+separately drawn destination permutation for each of eight training seeds, four probe subsets,
+and nine checkpoint pairs at the baseline parameter setting.

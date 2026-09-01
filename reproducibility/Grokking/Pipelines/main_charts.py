@@ -57,6 +57,13 @@ def main() -> None:
         "GROKKING_HODGE_PCA_DIM",
         "GROKKING_HODGE_BASIS",
         "GROKKING_HODGE_QUIVER_POINTS",
+        "GROKKING_HODGE_SWEEP_PCA_DIMS",
+        "GROKKING_HODGE_SWEEP_KNN",
+        "GROKKING_HODGE_SWEEP_BASES",
+        "GROKKING_HODGE_SWEEP_SUBSET_SIZE",
+        "GROKKING_HODGE_SWEEP_SUBSET_SEEDS",
+        "GROKKING_HODGE_SWEEP_PAIRS_PER_PHASE",
+        "GROKKING_HODGE_SWEEP_PERMUTATION",
         "GROKKING_CIRCULAR_PCA_DIM",
         "GROKKING_CIRCULAR_BASIS",
         "GROKKING_CIRCULAR_EIGENPAIRS",
@@ -147,6 +154,20 @@ def main() -> None:
             ("fig_grokking_event_study.png", "fig_grokking_event_study.pdf"),
             ANALYSIS_ROOT,
             (str(DATA_ROOT / "results" / "grokking_event_study" / "event_study_results.json"),),
+        ),
+        PipelineTask(
+            "hodge_robustness",
+            "11_hodge_robustness",
+            (),
+            ANALYSIS_ROOT,
+            (
+                str(
+                    DATA_ROOT
+                    / "results"
+                    / "grokking_hodge_robustness"
+                    / "hodge_robustness.json"
+                ),
+            ),
         ),
     )
 

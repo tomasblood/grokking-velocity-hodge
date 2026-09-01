@@ -1,0 +1,97 @@
+[
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/calibration/results/grokking_hodge_calibration/synthetic_hodge.json",
+    "bytes": 933,
+    "sha256": "71a6f1cac79bb4b3fc51f6b4a258737c12c2940819cbce879e0b1d9097cc017d"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed598/hodge_robustness.json",
+    "bytes": 125374,
+    "sha256": "8411df4b6fe964bab5e26b9a0e1c7f3acb2573f6152385a0295d15d247805915"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed599/hodge_robustness.json",
+    "bytes": 125373,
+    "sha256": "f7e86a4497bc8a9f3a44e78afc32c28831a2dd5eedcdb206564f5199150dd86f"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed777/hodge_robustness.json",
+    "bytes": 125435,
+    "sha256": "160ba5553fc2333580fdc0867f7e59f7efb4fff7236f9de90d4dd228a52f6c86"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed1001/hodge_robustness.json",
+    "bytes": 125411,
+    "sha256": "9a4026d9a74c843c247d638cc6756abcf4332a458bb65508abd797abbea9f473"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed2027/hodge_robustness.json",
+    "bytes": 125469,
+    "sha256": "9b27ca21201178c83cb9466b3b72a7a441eea4fa99963a8fa4233fe1fe6cf4a5"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed3141/hodge_robustness.json",
+    "bytes": 125446,
+    "sha256": "a76bdcc0cfa1d102b5b7f8f26e1d76593ad579bd66e6a70b2e68b27ae014a517"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed4096/hodge_robustness.json",
+    "bytes": 125415,
+    "sha256": "402fca348d2fb9d8b248ad26858132ddf53212799cc6af8047fdf0267a666d36"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/seed8080/hodge_robustness.json",
+    "bytes": 125405,
+    "sha256": "04d98ad29aaef78b60d331d8d73cd53d2e5d24f0e2a5772fbb67bbee83f12417"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis/results/grokking_acts_v6/training.json",
+    "bytes": 3079,
+    "sha256": "0b04b8415c8886153d66e6166b10f00fd991bfb61cb0597b34468d4c42490f88"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed599_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3067,
+    "sha256": "8b9bfd786135f351f151d64d9f21c69c42b826390b8ad0e374fc7ab4b928f355"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed777_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3076,
+    "sha256": "ebcaeba296a4ea094947c1b0ea431e9732cfb02dc9973ade33e41faaad2c4bc5"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed1001_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3038,
+    "sha256": "939a0bb85eebcb887b45ea52e853d5d46f759fa7b2aa4631ef3917662b0b3c1f"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed2027_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3033,
+    "sha256": "8a6f88c9d8ff5c81266a8903271f2c634829d39749c6b926e5285f839e58770d"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed3141_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3120,
+    "sha256": "3c8fffd371aa5190c08db39a7f7bcb754a8e4c9233f9aaf7843bc3da14330ed8"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed4096_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3050,
+    "sha256": "ecd61357f6dea2c1684d43853f2e9fbd0a18d46d5453df5c7cc1105ab02bf310"
+  },
+  {
+    "path": "/dbfs/FileStore/thesis_scratch/grokking_seed8080_hodge/results/grokking_acts_v6/training.json",
+    "bytes": 3505,
+    "sha256": "31ab000afba5be6ee0405daadce5510a1f25707923c2a9d4cc9521688eebb70d"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/cross_seed_summary_8seed.json",
+    "bytes": 43973,
+    "sha256": "fed14debabb926dabdeb8ac42b28d9c03b647da30f9b04086305a3fe31ae9566"
+  },
+  {
+    "path": "/dbfs/FileStore/Papers/grokking-velocity-hodge/experiments/key_findings_8seed.json",
+    "bytes": 43973,
+    "sha256": "fed14debabb926dabdeb8ac42b28d9c03b647da30f9b04086305a3fe31ae9566"
+  }
+]
